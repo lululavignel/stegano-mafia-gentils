@@ -1,0 +1,14 @@
+[
+  {
+    "username": "era",
+    "email": "aleksandarvasiljevic12@gmail.com",
+    "hashedPassword": "49eaab7e75d92ddfe7e7f7fb09f854116055d11f1d946b9e7fdfad8b8e56c8a0",
+    "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+  },
+  {
+    "username": "test",
+    "email": "test@gmail.com",
+    "hashedPassword": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+  }
+]

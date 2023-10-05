@@ -1,0 +1,38 @@
+[
+  {
+    "from": "era",
+    "to": "era",
+    "roomID": 2,
+    "encryptedMessage": "U2FsdGVkX197JmaM5tZfkyW96tly9jg1JwvrD3dSlRY=",
+    "encryptedSymmetricKey": "XSO4ZIx92ZSmoUJ+4k5nGyjHCnt9VDxKnGeod49kj45tIDJwUVSo5TVn3vBIlFbB/gqkcUrlfZEyJx0ZEn/lJz8zCwL8/dF3kgdlGMKPwUqEJYxsU532KgElDQdRI7zfyvMFprLihe3TbwvsQbi8W3tN65RWIymIC1T2JbGSs4CZzFJ5rwd53L3PRbkTniJF+hYp8zvmonIL8aym7m96ehJLkexdQpy6QTLd1C21j+G/eQ2/VVGpoTLK9+oS8BCkFfcMnEvpnKx0wQiZcekcDO4r0ESEcsMovuTWQZyxKWzt25eDwKRLgmTag8ChmwTGBaeY/jCbGIkrkcHCdchymA==?LdOSkql7UMhEjK9iZgDriss7NaCuSKakkT8Bt9WfgmQuiY1XDsKIShCJSFaJnalpc2HJ02OddGKUMiPFYpQFh6C4Wfr/dEmp1LOXEO7JmCc=",
+    "time": 1696406184969,
+    "direct": false
+  },
+  {
+    "from": "era",
+    "to": "era",
+    "roomID": 3,
+    "encryptedMessage": "U2FsdGVkX18KoVxaop0+s+FEgbum1Ca1ezH8mqlDDY8=",
+    "encryptedSymmetricKey": "K2vSTLlmCDRoh0x7i3nvjzl/Lj7PcBESXtodqEHBB/ObXbKrISRDemn7cO1pQ/yH1tPQLekCusZGhm98bmQ6v0oZVQTWYGqYfeKR+E+7PSXrXU+r/kncqomUotGMdrZaQJA2hA3VQPGAMfgq1R8ewixciDrutQ28HW+dIa6c3xu9J7/jF3kf1GibPXoO53p4QpEkezffu3J5u16BaCdU7+GixOlCQIBqz9FCHPaLIV8Xa0ZpHbH2FgzzbWDiR7StcirMXvTHnigwvNLnK7dO4hi3cDKoFmkKXL2BIC84wRXB0DbHWmAiwi7V3l/dqBwCJNW4CotWys0vXHlgiNPHIg==?DgoKJZt6AIE7B/FxRPIRW3uMwPCXmHxEqDTtEke9C/fBJUKZejTZGVSXLmSqW9erB4rKj4b/ul8DDi3ODMq5l/3gCmLI0FRjSbLpRuh/af0=",
+    "time": 1696406206675,
+    "direct": false
+  },
+  {
+    "from": "test",
+    "to": "era",
+    "roomID": 4,
+    "encryptedMessage": "U2FsdGVkX18P3vuEglWR60oq2TEdh0tzdBam/zRySOs=",
+    "encryptedSymmetricKey": "P/nM4RJaH5laFeZFhQ0cnDlpOYp4fvwqLP7jRnN8rNf6bE8USQvk6rsxEdFy7PGvgFUpg47Rsfq1A7DHsihGscAh2dpKQnHtZpef+7StuM+jgwsqly/fD4p4blGEOfcE04b/fQGHFMAqMLqi0YrDDGWbXu5JJrxQfR1uo5dpKVCaf03y/hkaB7glinb5g3teWwBbzOkLYfjOHTGwEWz8vuwgNMSjwGUThX+QUG973gXuic4YNspw9mP/wPWlYbJfA19ndXEBVZNjKj3Qv5SvGU9V637Ho/G+ThMYjkCKDk+Dizk5yvBSOXWHwffXL3MfctQbei14wYQRPjKh4nydbg==?JXY5sIOoWL9j5m8P6YGRx9d8FkG+11iAjV7g9BIA85K54rx2sC2sBgQmwX6EaKV02BJPYEw6/1mA6iMKb2Lar+VyMQzHlafQ6Wqyh1Jx6/o=",
+    "time": 1696406313042,
+    "direct": true
+  },
+  {
+    "from": "test",
+    "to": "test",
+    "roomID": 4,
+    "encryptedMessage": "U2FsdGVkX18xs4ggqc0LC1l3nq1F2jr4ZY6eG/ju0Uo=",
+    "encryptedSymmetricKey": "YTRDW6dUpzA+BSQLx/5XmTNQX5oVXvUNjtLm5YtFP4JkltP/vkqNKFzZfeg3l4lF020/iULzH6oM1BQuZM3Tb/fxa5dnMwAfN6baNG6NNWDN/VQUtm6gzJtKP+W6yK4i8YCSwu7g5YBJnIyt4oFa5s2zsTp5NRIaft3zWYqyuyHP+iiVLZklaJyq9R+B37A0FURbMmhbvNa4sg/YMFuP6Qr30D/kpVT9kGIB+v38xA6mKLAojShT/ewOHE/IVlKl6ObVgFEdHgPPTBySoLgH4nv3HKv70cANf1Ug1eTVM7toKlc9vnSQ/roM6e9esjXTX5E+anW1E2omOvNmg6vEVQ==?vPahk0PugBsXhFWHh7qqHDFpPnSrnhPIHq88/gykoIGXWJLw9UrmRRLy+HCoYK3ZsHfA/aEXCsfzdte6GMC6Al7BWdCxmOj4iR+uHmLTJoU=",
+    "time": 1696406313142,
+    "direct": true
+  }
+]

@@ -1,0 +1,17 @@
+[package]
+name = "stegano_project"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+getrandom = { version = "0.2.10", features = ["js"] }
+wasm-bindgen = "0.2"
+image = "0.24.7"
+imageproc = "0.23.0"
+num = "0.4.1"
+rand = "0.8.5"

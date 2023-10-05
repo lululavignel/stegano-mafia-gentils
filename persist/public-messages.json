@@ -1,0 +1,20 @@
+[
+  {
+    "username": "era",
+    "message": "test !",
+    "time": 1696406177367,
+    "roomID": 0
+  },
+  {
+    "username": "era",
+    "message": "Prout",
+    "time": 1696406181781,
+    "roomID": 1
+  },
+  {
+    "username": "test",
+    "message": "oskur",
+    "time": 1696406270383,
+    "roomID": 0
+  }
+]

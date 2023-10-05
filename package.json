@@ -1,0 +1,22 @@
+{
+  "name": "insecure-chat",
+  "version": "0.0.2",
+  "description": "A slightly more secure site",
+  "main": "server.js",
+  "author": "Aleksandar VASILJEVIC",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cryptico": "^1.0.2",
+    "crypto-js": "^4.1.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "he": "^1.2.0",
+    "socket.io": "^2.3.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "devDependencies": {}
+}
