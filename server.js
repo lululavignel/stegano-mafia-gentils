@@ -52,6 +52,15 @@ app.use('/clients', express.static(path.join(__dirname, 'public/clients'), {
     },
 }));
 
+// Define a route to serve PNG images with custom headers
+app.use('/images', express.static(path.join(__dirname, 'public/images'), {
+    setHeaders: (res, filePath) => {
+        if (path.extname(filePath) === '.png') {
+            res.setHeader('Content-Type', 'image/png');
+        }
+    },
+}));
+
 // Set the proper MIME type for WebAssembly files
 app.use('/pkg', express.static(path.join(__dirname, 'pkg'), {
     setHeaders: (res, filePath) => {
