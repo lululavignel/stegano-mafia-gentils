@@ -4,6 +4,13 @@ A slightly more secure site
 
 ## How to use
 
+Build rust
+```
+cargo build --target wasm32-unknown-unknown --release
+wasm-bindgen target/wasm32-unknown-unknown/release/stegano_project.wasm --out-dir .
+wasm-pack build --release --target web
+```
+
 ```
 $ cd code
 $ npm install

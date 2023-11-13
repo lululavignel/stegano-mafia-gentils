@@ -54,6 +54,10 @@ class Room {
         this.history.push(msg);
     }
 
+    addImage(image) {
+        this.history.push(image);
+    }
+
     static getRoomByName(name) {
         for (const room of rooms) {
             if (room.name === name) {

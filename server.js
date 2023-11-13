@@ -1,3 +1,5 @@
+// TODO: on veut que lorsqu'on envoit une image une interface se présente à l'utilisateur lui proposant d'utiliser un algorithme d'encryptage, l'autre mafieux pourra faire tourner tous les algorithmes (côtés serveur pour essayer de décrypter un message d'une image) et le serveur lui renverrait le résultat de toutes ces decryptages.
+
 const fs = require('fs');
 const he = require('he');
 const cryptico = require('cryptico');
@@ -10,6 +12,7 @@ const path = require('path');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const port = process.env.PORT || 3000;
+const imageFolder = 'images';
 
 const Rooms = require('./room.js');
 const Users = require('./user.js');
@@ -83,6 +86,34 @@ app.use('/styles', express.static(path.join(__dirname, 'public/styles'), {
 ////////////////////////////////////////////////////////////////////////
 // USEFUL //////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+/**
+ * Send an image message to the room.
+ *
+ * @param {Room} room - The room to send the image message to.
+ * @param {object} messageData - Data of the image message.
+ */
+function sendImageMessage(room, messageData) {
+    const imageFileName = messageData.imageName;
+    const imagePath = path.join(imageFolder, imageFileName);
+    // console.log('imagePath :>> ', imagePath);
+
+    // Read the image from the file and convert it to base64
+    fs.readFile(imagePath, 'base64', (err, imageBase64) => {
+        if (err) {
+            console.error('Error reading image file:', err);
+        } else {
+            const dataToSend = {
+                username: messageData.from,
+                image: imageBase64,
+                roomID: messageData.roomID,
+                time: messageData.time
+            };
+            console.log('sendImageMessage dataToSend :>> ', dataToSend);
+            sendToRoom(room, 'new image message', dataToSend);
+        }
+    });
+}
+
 /**
  * Function that use CrytoJS to generate a symmetric key
  * @returns a symmetric key
@@ -279,6 +310,32 @@ function checkUserIdentity(user) {
  */
 function sendToRoom(room, event, data) {
     io.to('room' + room.getId()).emit(event, data);
+}
+
+function persistImage(data) {
+    let messagesData = [];
+    try {
+        const presentData = fs.readFileSync('persist/images-data.json', 'utf8');
+        messagesData = JSON.parse(presentData);
+    } catch (err) {
+        console.error('Error reading image data:', err);
+        return;
+    }
+
+    messagesData.push({
+        imageName: data.imageName,
+        from: data.from,
+        roomID: data.roomID,
+        time: data.time,
+        direct: data.direct
+    });
+
+    try {
+        fs.writeFileSync('persist/images-data.json', JSON.stringify(messagesData, null, 2));
+        console.log('Image data persisted successfully.');
+    } catch (err) {
+        console.error('Error persisting image data:', err);
+    }
 }
 
 /**
@@ -480,29 +537,73 @@ function loadPrivateDirectMessagesData() {
 /**
  * Loads public messages data from a JSON file and sends them to their respective rooms.
  */
+// function loadPublicMessagesData() {
+//     try {
+//         const data = fs.readFileSync('persist/public-messages.json', 'utf8');
+//         const messagesData = JSON.parse(data);
+
+//         for (const messageData of messagesData) {
+//             const room = Rooms.getRoom(messageData.roomID);
+//             if (room) {
+//                 sendToRoom(room, 'new public message', messageData);
+//                 room.addMessage({
+//                     username: messageData.username,
+//                     message: messageData.message,
+//                     time: messageData.time
+//                 });
+//             }
+//         }
+
+//         console.log('Public messages data loaded successfully');
+//     } catch (err) {
+//         console.log('Error loading public messages data:', err);
+//     }
+// }
+
+/**
+ * Loads public and image messages data from JSON files and sends them to their respective rooms.
+ */
 function loadPublicMessagesData() {
     try {
-        const data = fs.readFileSync('persist/public-messages.json', 'utf8');
-        const messagesData = JSON.parse(data);
+        // Load public messages data
+        const publicData = fs.readFileSync('persist/public-messages.json', 'utf8');
+        const publicMessagesData = JSON.parse(publicData);
 
-        for (const messageData of messagesData) {
+        // Load image messages data
+        const imageData = fs.readFileSync('persist/images-data.json', 'utf8');
+        const imagesData = JSON.parse(imageData);
+
+        // Combine and sort all messages by time
+        const allMessagesData = [...publicMessagesData, ...imagesData];
+        allMessagesData.sort((a, b) => a.time - b.time);
+
+        // Process and send messages to their respective rooms
+        allMessagesData.forEach((messageData) => {
             const room = Rooms.getRoom(messageData.roomID);
             if (room) {
-                sendToRoom(room, 'new public message', messageData);
-                room.addMessage({
-                    username: messageData.username,
-                    message: messageData.message,
-                    time: messageData.time
-                });
+                if ('message' in messageData) {
+                    sendToRoom(room, 'new public message', messageData);
+                    room.addMessage({
+                        username: messageData.username,
+                        message: messageData.message,
+                        time: messageData.time
+                    });
+                } else if ('imageName' in messageData) {
+                    sendImageMessage(room, messageData);
+                    room.addImage({
+                        username: messageData.from,
+                        image: messageData.imageName,
+                        time: messageData.time
+                    });
+                }
             }
-        }
+        });
 
-        console.log('Public messages data loaded successfully');
+        console.log('Messages data loaded successfully');
     } catch (err) {
-        console.log('Error loading public messages data:', err);
+        console.log('Error loading messages data:', err);
     }
 }
-
 
 /** Function to load users data from file
  */
@@ -753,6 +854,37 @@ io.on('connection', (socket) => {
     ///////////////////////
     // incomming message //
     ///////////////////////
+
+    socket.on('new image message', (data) => {
+        const time = new Date().getTime();
+        const room = Rooms.getRoom(data.roomID);
+        const uniqueFileName = `${data.roomID}_${time}.png`;
+        const imagePath = `${imageFolder}/${uniqueFileName}`;
+
+        // Save the image to the specified folder
+        fs.writeFile(imagePath, data.image, 'base64', (err) => {
+            if (err) {
+                console.error('Error saving image:', err);
+            } else {
+                console.log('Image saved:', imagePath);
+            }
+        });
+        const dataToPersist = {
+            imageName: uniqueFileName,
+            from: data.sender.username,
+            roomID: data.roomID,
+            time: time,
+            direct: room.direct
+        };
+        const dataToSend = {
+            username: data.sender.username,
+            image: data.image,  // imageData is the base64 data URI of the image
+            roomID: data.roomID,
+            time: time
+        };
+        sendToRoom(room, 'new image message', dataToSend);
+        persistImage(dataToPersist);
+    });
 
     // Handles the event when a new public message is received
     socket.on('new public message', data => {

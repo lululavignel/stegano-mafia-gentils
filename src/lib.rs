@@ -43,3 +43,4 @@ pub fn decrypt_message(base64_image: &str) -> String {
     
     secret_message
 }
+

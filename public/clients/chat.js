@@ -1,5 +1,6 @@
 $(function () {
     // Initialize variables
+    // TODO: try to add a new socket that will catch the loaded messages from the server and add them directly to the historic of the chats - soit pas con tu vas comprendre - raaah
     const $window = $(window);
     const $messages = $('.messages'); // Messages area
     const $inputMessage = $('#input-message'); // Input message input box
@@ -147,6 +148,12 @@ $(function () {
                     msg.room = roomID;
                     return msg;
                 }
+            } else if (m.image) {
+                // console.log('setRoom m :>> ', m);
+                addChatImage(m.username, m.image, m.time);
+                const msg = { ...m };
+                msg.room = m.roomID;
+                return msg;
             } else {
                 addChatMessage(m);
                 const msg = { ...m };
@@ -250,6 +257,26 @@ $(function () {
     // USEFUL //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
 
+    // Function to add an image to the chat
+    function addChatImage(username, imageSrc, timeObj) {
+        let time = new Date(timeObj).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: "numeric",
+            minute: "numeric"
+        });
+        $messages.append(`
+            <div class="message">
+                <div class="message-avatar"></div>
+                <div class="message-textual">
+                    <span class="message-user">${username}</span>
+                    <span class="message-time">${time}</span>
+                    <img src="${imageSrc}" alt="Image" class="message-image">
+                </div>
+            </div>
+        `);
+        $messages[0].scrollTop = $messages[0].scrollHeight;
+    }
+
     function addChatMessage(msg) {
         let time = new Date(msg.time).toLocaleTimeString('en-US', {
             hour12: false,
@@ -308,6 +335,83 @@ $(function () {
     }
     window.leaveChannel = leaveChannel;
 
+    // Get a reference to the drop zone element
+    const dropZone = document.getElementById('drop-zone');
+
+    // Prevent the default behavior of the browser when a file is dropped
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+
+        if (files.length > 0) {
+            // Assume the first file is the image
+            const imageFile = files[0];
+
+            // Handle the image file, e.g., display it or upload it
+            handleImageFile(imageFile);
+        }
+    });
+
+    // Add a click event to open the file dialog for manual file selection
+    dropZone.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        fileInput.addEventListener('change', (e) => {
+            const imageFile = e.target.files[0];
+            handleImageFile(imageFile);
+        });
+
+        fileInput.click();
+    });
+
+    // Handle the selected image file
+    function handleImageFile(imageFile) {
+        // Check if it's an image file (you can add more validation)
+        if (imageFile.type.startsWith('image/')) {
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                const imageData = event.target.result;
+                sendImage(imageData)
+            };
+
+            reader.readAsDataURL(imageFile);
+        } else {
+            alert('Please select a valid image file.');
+        }
+    }
+
+    // Function to send an image
+    function sendImage(imageData) {
+        if (connected && currentRoom !== false) {
+            const user = encryptConnectionDataWithoutHashing(window.user, serverPublicKey);
+            const msgSymmetricKey = generateSymmetricKey().toString();
+
+            // Send the image as a message
+            const msg = {
+                sender: user,
+                image: imageData,  // imageData is the base64 data URI of the image
+                roomID: currentRoom.id,
+            };
+            socket.emit('new image message', msg);
+        }
+    }
+
     /////////////////////
     // Keyboard events //
     /////////////////////
@@ -365,7 +469,6 @@ $(function () {
                 try {
                     return room.id === roomID;
                 } catch (error) {
-                    // Handle the error when room is undefined
                     return false;
                 }
             });
@@ -408,6 +511,32 @@ $(function () {
             addChatMessage(data);
         else
             messageNotify(data);
+    });
+
+    socket.on('new image message', data => {
+        const username = data.username;
+        const imageSrc = data.image;
+        const time = data.time;
+        const roomId = data.roomID;
+
+        const room = rooms.find(room => {
+            try {
+                return room.id === roomId;
+            } catch (error) {
+                return false;
+            }
+        });
+        console.log('room new image message :>> ', room);
+        if (room) {
+            console.log("image pushed in history");
+            room.history.push(data);
+        }
+
+        // console.log('new image message data :>> ', data);
+
+        if (roomId == currentRoom.id)
+            addChatImage(username, imageSrc, time);
+
     });
 
     socket.on('update_user', data => {
