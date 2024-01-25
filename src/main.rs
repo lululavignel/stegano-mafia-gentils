@@ -1,3 +1,5 @@
+mod annalyser;
+
 fn main() {
     let img = image::open("cc.png").unwrap().to_rgb8();
     let rgb: Vec<u8> = img.into_raw();

@@ -34,5 +34,41 @@
     "encryptedSymmetricKey": "YTRDW6dUpzA+BSQLx/5XmTNQX5oVXvUNjtLm5YtFP4JkltP/vkqNKFzZfeg3l4lF020/iULzH6oM1BQuZM3Tb/fxa5dnMwAfN6baNG6NNWDN/VQUtm6gzJtKP+W6yK4i8YCSwu7g5YBJnIyt4oFa5s2zsTp5NRIaft3zWYqyuyHP+iiVLZklaJyq9R+B37A0FURbMmhbvNa4sg/YMFuP6Qr30D/kpVT9kGIB+v38xA6mKLAojShT/ewOHE/IVlKl6ObVgFEdHgPPTBySoLgH4nv3HKv70cANf1Ug1eTVM7toKlc9vnSQ/roM6e9esjXTX5E+anW1E2omOvNmg6vEVQ==?vPahk0PugBsXhFWHh7qqHDFpPnSrnhPIHq88/gykoIGXWJLw9UrmRRLy+HCoYK3ZsHfA/aEXCsfzdte6GMC6Al7BWdCxmOj4iR+uHmLTJoU=",
     "time": 1696406313142,
     "direct": true
+  },
+  {
+    "from": "lulu",
+    "to": "era",
+    "roomID": 3,
+    "encryptedMessage": "U2FsdGVkX1+dX96OZtPHvolaHedGri4DgJ+4/DrOcRXKrOej96+wH6NsFvApLk9yJcH6IdNGKJiL2efbf9KORw==",
+    "encryptedSymmetricKey": "MKznXj02cYyZJBtOvhr7CPKp74LEF4r47o1eIdXUeu5B+MeA8E3XMTzOm0ZrzHmqr0ZN8Brq5uaMHxU/AYcdHHoBEWhE9n03oTIoA0ddnPYIbUIpm3eEH0+348xDn7gpf0A6gp3Xyek9NfTae4MKMLRwyqWiC8C9o+KraZiPLtiFqV6oTnyRLwRxBAfhAGJUT+CFtiFwlvYQIzeg9AEQPak9sGSzCBrJAa1zmLqOyfxzk2QzXwU2SCKGwK4Kn+6ID0RZgODZH6Rqxbu8pheAv+hi2FUPAx19z2llLgmr/0HCDyUD6nty0752jJ+kwf+rXcTyGWnImczq1gfK62RAUA==?DZjz1/jHaTczvlGCcmstAL/awbTl90p+Y4YLucvPN9d2/rtQQiCGfQGm84xrgPVbJpIt+UH8eLJ8Gbh+QvKvVE9FdGYc2FVWmrGne0wSBvg=",
+    "time": 1699872919461,
+    "direct": false
+  },
+  {
+    "from": "lulu",
+    "to": "era",
+    "roomID": 3,
+    "encryptedMessage": "U2FsdGVkX18eyJELNvIVEg+2/iFJ5AF4VOFtaMqU39I=",
+    "encryptedSymmetricKey": "B6v1X60v662AC1XBximBfC/ZfPkYtdtKRBJNNGOGQM7bQjF2op/4Pv4JCmB0/0VdTK0vuPY3b4wcMsNDFVaQVq4+M+yxRurFq7U0uR8NwlpZp+mmVSfselz1N/yvS1dYtQoTm8/IQMNbYFPn2/p/NbdEBzrKWeRQhmrn+YMXTbAd1e5oFXLCekMJpRZ93rj3T+FVeh9jVV2mxVTW19Iv2drzEsx340cNIUdMG8sT6zlqLcv2a4IB6s2WXb+w15WLmcrke+gApylyvSM1Y+RkGiNEfcqmLN/ZR5hhYrMU29TSyY0DP91AE6f8s7Zs991A7MQYKHjPYKTQ1N3HCs6rhA==?X7WeN0PHr/gQlR96f0tMrV8fHaCbZBYowwEYOIFhmVRRZFN9ItAfIuBlx+vrW4/WSRBAhyYPXYRH+SU1jUgUSTRBj1KqzXhugzrt0P22YXs=",
+    "time": 1699873055742,
+    "direct": false
+  },
+  {
+    "from": "lulu",
+    "to": "era",
+    "roomID": 5,
+    "encryptedMessage": "U2FsdGVkX1+iHoum1bF6rxTTiXWQ3YrSnaqNTMTVcAc=",
+    "encryptedSymmetricKey": "I2WrJkH4QE2fjOv4C5KWu5T+H2mJ5ywcjUg92s/X1SV8vxV9YOzU7lK8Xsotdg8XKq66mr3rC15vyhhXCUUC+P7V60dH53sCTJ82Km+tSwzTzTcszU5fsZUN8zBzuut5w5bCgaTkkEh9zqscHCwRE13vhajFK/cdN2Nzb31LmP8dQjy7uuqUe/AdTg13Y/Vhr/17/kjFdcUXQ1/h18x8bvC3hrtnv8Q6bnVeoEGbRp+vfbfaCqY8oI365cHmUI+Uh0aXpsIa7Dd2BG9Qc/g/QYM7zs3E0Cnehull3RK0aKU4j1QGp70YAbCZVc9JC9ZYAtO8dCqKD+FYvvimgxdrHQ==?VMw1ZQAD1Lp9JmqBnTyktuI5JxktNOu+n5aOZf+NDWuk25zaThyQU+61Hoq1hsKXH56E0sR8zZoFd2XGfkgHthhMrnRz97Eo67SxErDHC3w=",
+    "time": 1699873067962,
+    "direct": true
+  },
+  {
+    "from": "lulu",
+    "to": "lulu",
+    "roomID": 5,
+    "encryptedMessage": "U2FsdGVkX18zQqQIcmlI9AurZ2rqd7IRoc8wECWf5vg=",
+    "encryptedSymmetricKey": "dzZySA8XeEKHrMK8Ykk63j2JzWJ7x6lHgCnFGu6laSvk1qY2+DLLLR9uum0v5moLuGvtlsAW5j2a3Oobldme4N5EQ1WhKh5kjp77kqa3yGS90ZLQMaQdEjO06EY9hBZOxcdZkvu7MLxffrjpx7oCKsc6Egk5jHkhjzyzojChPKRuzTqr4KOcYkPHT/TkCOEB3U0fB1sNLujRxmvEamZiF+9KfgLmFEds3bkyNXVHSLSf7RchrDodeFoVDc1slwByfHsiW1/H4vwBmFXTHPrb9f1htfi9dJwEXWg5FeEIoPC6zT8K49WnV3gwmgCQ1Mtw+eXaVX+IKhweoafReyfU0w==?rcPweTSdrSnO7PUb8IwxWmbcu9GMXQJyzwMEvQeJ8E3B/yTuYDOg+FMSRUGbE2+4Ut8X2myfP4n9D4nHaCy4fBkNANzIRxk5dT9peeNB6Uc=",
+    "time": 1699873068119,
+    "direct": true
   }
 ]

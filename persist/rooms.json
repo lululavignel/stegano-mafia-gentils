@@ -17,6 +17,28 @@
     ]
   },
   {
+    "id": 4,
+    "name": "Direct-era-test",
+    "description": "",
+    "options": {
+      "forceMembership": false,
+      "private": true,
+      "direct": true
+    },
+    "members": [
+      {
+        "username": "era",
+        "email": "aleksandarvasiljevic12@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      },
+      {
+        "username": "test",
+        "email": "test@gmail.com",
+        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      }
+    ]
+  },
+  {
     "id": 0,
     "name": "random",
     "description": "Random!",
@@ -35,6 +57,11 @@
         "username": "test",
         "email": "test@gmail.com",
         "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      },
+      {
+        "username": "lulu",
+        "email": "lulu@gmail.com",
+        "publicKey": "g3BGplqbsjOU9w49QNnNJ2l47G0bOBUpa9HaYp4nSTfogYGYhqNbL4XQ188MmnDoMZtiKL5gvDur4e7G/oYD+M8ZMzrWLNihdhDlXI9q5tKtpgFzYlH1XLtvtbKO6b9/2RXFgCUvKaU+yNCvQr1KYdLCxRfWFoPQ2E38TJxRwcai4E3VK+ZAa93C+N5nuW+FSNl1UMUlgnzELa21HE7p3tl3F0ssQph03qy4dml0MU5L0pjB+vRj7CbxcbqTREGjZt0oYehnRYRN8+XLz8HEKtSRfs1wzTaBgTMgi6/S6adm5qwz1KO9TrUDfsvfWMEXxPzKqqIPd3O2nqj77HRhqw=="
       }
     ]
   },
@@ -57,6 +84,11 @@
         "username": "test",
         "email": "test@gmail.com",
         "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      },
+      {
+        "username": "lulu",
+        "email": "lulu@gmail.com",
+        "publicKey": "g3BGplqbsjOU9w49QNnNJ2l47G0bOBUpa9HaYp4nSTfogYGYhqNbL4XQ188MmnDoMZtiKL5gvDur4e7G/oYD+M8ZMzrWLNihdhDlXI9q5tKtpgFzYlH1XLtvtbKO6b9/2RXFgCUvKaU+yNCvQr1KYdLCxRfWFoPQ2E38TJxRwcai4E3VK+ZAa93C+N5nuW+FSNl1UMUlgnzELa21HE7p3tl3F0ssQph03qy4dml0MU5L0pjB+vRj7CbxcbqTREGjZt0oYehnRYRN8+XLz8HEKtSRfs1wzTaBgTMgi6/S6adm5qwz1KO9TrUDfsvfWMEXxPzKqqIPd3O2nqj77HRhqw=="
       }
     ]
   },
@@ -79,12 +111,17 @@
         "username": "test",
         "email": "test@gmail.com",
         "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      },
+      {
+        "username": "lulu",
+        "email": "lulu@gmail.com",
+        "publicKey": "g3BGplqbsjOU9w49QNnNJ2l47G0bOBUpa9HaYp4nSTfogYGYhqNbL4XQ188MmnDoMZtiKL5gvDur4e7G/oYD+M8ZMzrWLNihdhDlXI9q5tKtpgFzYlH1XLtvtbKO6b9/2RXFgCUvKaU+yNCvQr1KYdLCxRfWFoPQ2E38TJxRwcai4E3VK+ZAa93C+N5nuW+FSNl1UMUlgnzELa21HE7p3tl3F0ssQph03qy4dml0MU5L0pjB+vRj7CbxcbqTREGjZt0oYehnRYRN8+XLz8HEKtSRfs1wzTaBgTMgi6/S6adm5qwz1KO9TrUDfsvfWMEXxPzKqqIPd3O2nqj77HRhqw=="
       }
     ]
   },
   {
-    "id": 4,
-    "name": "Direct-era-test",
+    "id": 5,
+    "name": "Direct-era-lulu",
     "description": "",
     "options": {
       "forceMembership": false,
@@ -98,9 +135,26 @@
         "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
       },
       {
-        "username": "test",
-        "email": "test@gmail.com",
-        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+        "username": "lulu",
+        "email": "lulu@gmail.com",
+        "publicKey": "g3BGplqbsjOU9w49QNnNJ2l47G0bOBUpa9HaYp4nSTfogYGYhqNbL4XQ188MmnDoMZtiKL5gvDur4e7G/oYD+M8ZMzrWLNihdhDlXI9q5tKtpgFzYlH1XLtvtbKO6b9/2RXFgCUvKaU+yNCvQr1KYdLCxRfWFoPQ2E38TJxRwcai4E3VK+ZAa93C+N5nuW+FSNl1UMUlgnzELa21HE7p3tl3F0ssQph03qy4dml0MU5L0pjB+vRj7CbxcbqTREGjZt0oYehnRYRN8+XLz8HEKtSRfs1wzTaBgTMgi6/S6adm5qwz1KO9TrUDfsvfWMEXxPzKqqIPd3O2nqj77HRhqw=="
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "fkhvikez",
+    "description": "oui",
+    "options": {
+      "forceMembership": false,
+      "private": false,
+      "direct": false
+    },
+    "members": [
+      {
+        "username": "lulu",
+        "email": "lulu@gmail.com",
+        "publicKey": "g3BGplqbsjOU9w49QNnNJ2l47G0bOBUpa9HaYp4nSTfogYGYhqNbL4XQ188MmnDoMZtiKL5gvDur4e7G/oYD+M8ZMzrWLNihdhDlXI9q5tKtpgFzYlH1XLtvtbKO6b9/2RXFgCUvKaU+yNCvQr1KYdLCxRfWFoPQ2E38TJxRwcai4E3VK+ZAa93C+N5nuW+FSNl1UMUlgnzELa21HE7p3tl3F0ssQph03qy4dml0MU5L0pjB+vRj7CbxcbqTREGjZt0oYehnRYRN8+XLz8HEKtSRfs1wzTaBgTMgi6/S6adm5qwz1KO9TrUDfsvfWMEXxPzKqqIPd3O2nqj77HRhqw=="
       }
     ]
   }
