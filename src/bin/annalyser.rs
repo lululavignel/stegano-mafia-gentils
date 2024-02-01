@@ -1,7 +1,8 @@
 
 
 use clap::{Arg, App};
-use image::{RgbImage, ImageBuffer, Rgb, io::Reader as ImageReader};
+use image::{io::Reader as ImageReader, ImageBuffer, Rgb, RgbImage};
+use statrs::distribution::{Binomial, ChiSquared, ContinuousCDF, Discrete};
 
 
 
@@ -37,8 +38,8 @@ fn main() {
                  .max_values(1));
     
     let matches = app.clone().get_matches();
-    let mut img_in;
-    let mut img_out_filename;
+    let img_in;
+    let img_out_filename;
     
     if matches.is_present(IM_TRANS) {
         let mut images_name=match matches.values_of(I_O_NAME) {
@@ -63,11 +64,83 @@ fn main() {
         
     }
     else {
-        app.print_help();
+        app.print_help().unwrap();
     }
 
 }
 
+fn khi_squared_analysis_windowed(img : & RgbImage, bytes_to_analyse : u32,windows_size :i32)-> f64{ //TODO rgb *3 ?
+
+    //Pour le test de conformité, degres_liberte = nb_categories-1
+    let pixel_count=(windows_size*windows_size) as usize;
+    let degres_liberte: f64 = (pixel_count*bytes_to_analyse as usize ) as f64;
+    let binom = Binomial::new(0.5, (pixel_count*bytes_to_analyse as usize )as u64).unwrap();
+    
+
+    //Initialiser le vecteur attendu pour le test (répartition homogène des pixels)
+    let (length, height) = img.dimensions();
+    let nb_pixels: u32 = 3 * (length-(1+windows_size as u32/2)) * (height-(1+windows_size as u32/2));
+    //let repartition_pixels = nb_pixels as f64 /categories as f64;
+
+   
+    let mut frequence_pixel: Vec<u32> = vec![0; pixel_count*2+1]; //TODO probabilités d'obtenir chaque lettre
+    //println!("nombre de pixels attendus pour chaque catégorie : {}",frequence_pixel_attendue[0]);
+
+    //Générer le vecteur de la répartition des pixels de l'image
+    
+    for i in windows_size/2..length as i32-(windows_size+1)/2{
+        for j in windows_size/2..height as i32-(windows_size+1)/2{
+            
+            let mut bit_count :[usize;3]=[0,0,0];
+
+            for d_i  in -windows_size/2..(windows_size+1)/2{
+                for d_j in -windows_size/2..(windows_size+1)/2{
+                    //println!("di : {} dj: {}",d_i,d_j);
+                    let pixel = img.get_pixel((i+d_i) as u32, (j+d_j) as u32);
+                    let mut index=0;
+                    for val in pixel.0{
+                        bit_count[index]+= (val & 0x1) as usize;
+                        bit_count[index]+= ((val>>1) & 0x1) as usize;
+                        index+=1;
+                        //println!("val: {} , {}",val, bit_count);
+                    }
+                }   
+            }
+            for count in bit_count{
+                frequence_pixel[count]+=1;
+            }
+        }   
+    }
+
+    //Calcul pour comparaison entre le vecteur attendu et observé
+    let mut sum_khi = 0.0;
+    let mut sum_got=0.0;
+    let mut sum_expected=0.0;
+    for i in 0..pixel_count*2 +1{
+        let expected_freq=nb_pixels as f64 *binom.pmf(i as u64);
+        let diff = frequence_pixel[i as usize] as f64  - expected_freq;
+        sum_expected+= expected_freq;
+        sum_got+= frequence_pixel[i as usize] as f64;
+        println!("diff : {} , nbr of pixels : {}, expected : {}",diff, frequence_pixel[i as usize],expected_freq);
+
+        let squared_diff =diff *diff;
+        let result = squared_diff / expected_freq;
+        println!("{:.4}", result);
+        sum_khi += result;
+        println!("i:  {:?}     sum_khi:{:?}", i, sum_khi);
+    }
+    println!("pixel get : {} , expected: {}",sum_got,sum_expected);
+    //Calcul de l'indice de confiance graĉe à khi carré
+    let khi_squared = ChiSquared::new(degres_liberte).unwrap();
+    //let khi_result_pdf = Continuous::pdf(&khi_squared, sum_khi); //Formule : 1 / (2^(k / 2) * Γ(k / 2)) * x^((k / 2) - 1) * e^(-x / 2)   (source : documentation de statrs::distribution::ChiSquared)
+    //let khi_result_pdf = khi_squared.pdf(sum_khi);
+    //let khi_result_cdf = ContinuousCDF::cdf(&khi_squared, sum_khi); //Formule : (1 / Γ(k / 2)) * γ(k / 2, x / 2) where k is the degrees of freedom, Γ is the gamma function, and γ is the lower incomplete gamma function     (source : documentation de statrs::distribution::ChiSquared)
+    let khi_result_cdf = khi_squared.cdf(sum_khi/((nb_pixels as f64).log2()*(nb_pixels as f64).log2()));
+    //println!("khi pdf:  {:.8}", khi_result_pdf);
+    println!("khi cdf:  {:.8}", khi_result_cdf);
+
+    return khi_result_cdf;
+}
 
 
 pub fn stats_last_bits(img : & RgbImage,bytes: i32)->Vec<u32>{
@@ -214,5 +287,32 @@ mod test_annalyzer{
         
         
     }
+    #[test]
+    fn khi_annalyser(){
+        let mut cur_str="images/celeste-3-1.0-sha2-p-c.png";
+        let mut image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        let mut result = khi_squared_analysis_windowed(&image, 2,3); 
+        println!("result : {}",result);
+        /*
+        cur_str= "images/IMG_20231017_164521.png";
+        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        result = khi_squared_analysis_windowed(&image, 2,3);  
+        println!("result : {}",result);
+        */
+        cur_str= "images/earth-1.0-sha2-p-c.png";
+        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        result = khi_squared_analysis_windowed(&image, 2,3);  
+        println!("result : {}",result);
 
+        cur_str= "images/earth-1.0-sha2-p-c.png";
+        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        result = khi_squared_analysis_windowed(&image, 2,11);  
+        println!("result : {}",result);
+        /*
+        cur_str= "images/earth-0.5-sha2-p-c.png";
+        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        result = khi_squared_analysis_windowed(&image, 2,10);  
+        println!("result : {}",result);
+        */
+    }
 }
