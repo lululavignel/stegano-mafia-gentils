@@ -146,6 +146,27 @@ pub fn randomize_lsb(img_in: &RgbImage, p:f32,mask:u8) ->RgbImage{
 
     return  img_out;
 }
+pub fn entropy_and_randomization(img_in: &RgbImage, p:f32,mask:u8) -> f64{
+    let mask_bits = ((1<<mask) -1) as u8;
+    let mut iterator1 = init_base_shanon_iterator(&img_in,0,0,img_in.width(),img_in.height(),255);
+    let a =compute_shanon_entropy(&img_in,&mut iterator1);
+    let mut iterator2 = init_base_shanon_iterator(&img_in,0,0,img_in.width(),img_in.height(),mask_bits);
+    let b=compute_shanon_entropy(&img_in,&mut iterator2);
+    return entropy_and_randomization_after_first_measure(img_in,a,b,p,mask);
+
+
+}
+pub fn entropy_and_randomization_after_first_measure(img_in: &RgbImage,a: (f64, f64, f64),b: (f64, f64, f64), p:f32,mask:u8) -> f64{
+    let mask_bits = ((1<<mask) -1) as u8;
+    let image =randomize_lsb(& img_in, p, mask_bits);
+    println!("jpp: {:?} ; {:?}", a,b);
+    let mut iterator1 = init_base_shanon_iterator(&image,0,0,img_in.width(),img_in.height(),255);
+    let a2 =compute_shanon_entropy(&img_in,&mut iterator1);
+    let mut iterator2 = init_base_shanon_iterator(&image,0,0,img_in.width(),img_in.height(),mask_bits);
+    let b2=compute_shanon_entropy(&img_in,&mut iterator2);
+    return  ((a2.0/b2.0)/(a.0/b.0)-1.)*100.;
+    
+}
 
 #[cfg(test)]
 mod test_entropy{
@@ -168,7 +189,19 @@ mod test_entropy{
         println!("Computed shanon entropy with a 0xFC mask : {:?}", compute_shanon_entropy(&image,&mut iterator3));
         println!("0xFF/Ox03 : {}",a.0/b.0);
         
+        
     }
+    ///
+    /// 
+    /// Calculate  d(a.0/b.0)/d(t)
+    /// with a.0 entropy of the img with a mask of 0xFF, and b.0 the one with a 0x03 mask.
+    /// In other words calculate the entropy of an image. Then, randomize the value of some pixel
+    /// And calculate the entropy once again.
+    /// Then we look a the percentage 
+    /// 
+    /// 
+    /// 
+    
     #[test]
     fn test_randomize_img(){
         let path = "/home/admin/Images/steg/base_img";
