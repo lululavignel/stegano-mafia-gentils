@@ -7,6 +7,15 @@
 [ ! -d ~/Images/steg/s256-c-p-0.8 ] && mkdir ~/Images/steg/s256-c-p-0.8
 [ ! -d ~/Images/steg/s256-c-p-0.99 ] && mkdir ~/Images/steg/s256-c-p-0.99
 
+
+[ ! -d ~/Images/steg/base_img/logs ] && mkdir ~/Images/steg/base_img/logs
+[ ! -d ~/Images/steg/s256-c-p-0.1/logs ] && mkdir ~/Images/steg/s256-c-p-0.1/logs
+[ ! -d ~/Images/steg/s256-c-p-0.2/logs ] && mkdir ~/Images/steg/s256-c-p-0.2/logs
+[ ! -d ~/Images/steg/s256-c-p-0.4/logs ] && mkdir ~/Images/steg/s256-c-p-0.4/logs
+[ ! -d ~/Images/steg/s256-c-p-0.5/logs ] && mkdir ~/Images/steg/s256-c-p-0.5/logs
+[ ! -d ~/Images/steg/s256-c-p-0.8/logs ] && mkdir ~/Images/steg/s256-c-p-0.8/logs
+[ ! -d ~/Images/steg/s256-c-p-0.99/logs ] && mkdir ~/Images/steg/s256-c-p-0.99/logs
+
 for prob in "0.1" "0.2" "0.4" "0.5" "0.8" "0.99" 
 do
     echo $prob

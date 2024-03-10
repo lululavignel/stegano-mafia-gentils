@@ -170,9 +170,10 @@ mod test_test_proc{
             cyphered:false,
         };
         let mut logs = Vec::new();
+
         logs.push(File::create(format!("{path}/logs/SE0xFF")).unwrap());
         logs.push(File::create(format!("{path}/logs/SE0x03")).unwrap());
-        logs.push(File::create(format!("{path}/logs/SER0x03")).unwrap());
+        logs.push(File::create(format!("{path}/logs/SER0x02")).unwrap());
         defaut_test(img_names, infos, true, &mut Some(logs), &format!("{path}/logs/log"));
     }
 }
