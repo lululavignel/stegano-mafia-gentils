@@ -1,6 +1,7 @@
 mod annalyser;
-mod test_procedure;
-mod shannon_entropy;
+pub mod test_procedure;
+pub mod shannon_entropy;
+
 
 fn main() {
     let img = image::open("cc.png").unwrap().to_rgb8();

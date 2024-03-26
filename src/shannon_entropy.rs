@@ -1,6 +1,4 @@
-use std::{collections::HashMap, str::Bytes};
-
-
+use std::collections::HashMap;
 use image::RgbImage;
 use rand::{distributions::{Distribution, Uniform}, Rng};
 
@@ -146,25 +144,30 @@ pub fn randomize_lsb(img_in: &RgbImage, p:f32,mask:u8) ->RgbImage{
 
     return  img_out;
 }
-pub fn entropy_and_randomization(img_in: &RgbImage, p:f32,mask:u8) -> f64{
-    let mask_bits = ((1<<mask) -1) as u8;
+pub fn entropy_and_randomization(img_in: &RgbImage, p:f32,mask_bits:u8) -> f64{
+    //let mask_bits = (1<<mask-1) as u8;
     let mut iterator1 = init_base_shanon_iterator(&img_in,0,0,img_in.width(),img_in.height(),255);
     let a =compute_shanon_entropy(&img_in,&mut iterator1);
     let mut iterator2 = init_base_shanon_iterator(&img_in,0,0,img_in.width(),img_in.height(),mask_bits);
     let b=compute_shanon_entropy(&img_in,&mut iterator2);
-    return entropy_and_randomization_after_first_measure(img_in,a,b,p,mask);
+    return entropy_and_randomization_after_first_measure(img_in,a,b,p,mask_bits);
 
 
 }
-pub fn entropy_and_randomization_after_first_measure(img_in: &RgbImage,a: (f64, f64, f64),b: (f64, f64, f64), p:f32,mask:u8) -> f64{
-    let mask_bits = ((1<<mask) -1) as u8;
+pub fn entropy_and_randomization_after_first_measure(img_in: &RgbImage,values_mask_max: (f64, f64, f64),values_mask_min: (f64, f64, f64), p:f32,mask_bits:u8) -> f64{
+    //let mask_bits = (1<<mask-1) as u8;
     let image =randomize_lsb(& img_in, p, mask_bits);
-    println!("jpp: {:?} ; {:?}", a,b);
+    let image_dim= img_in.dimensions();
+    let image_size=image_dim.0 * image_dim.1;
+    //println!("jpp: {:?} ; {:?}", a,b);
     let mut iterator1 = init_base_shanon_iterator(&image,0,0,img_in.width(),img_in.height(),255);
-    let a2 =compute_shanon_entropy(&img_in,&mut iterator1);
+    let values_mask_max2 =compute_shanon_entropy(&img_in,&mut iterator1);
     let mut iterator2 = init_base_shanon_iterator(&image,0,0,img_in.width(),img_in.height(),mask_bits);
-    let b2=compute_shanon_entropy(&img_in,&mut iterator2);
-    return  ((a2.0/b2.0)/(a.0/b.0)-1.)*100.;
+    let values_mask_min2=compute_shanon_entropy(&img_in,&mut iterator2);
+    println!("===ausec===");
+    println!("max1 : {:?}   min1 : {:?} \n max2 : {:?} min2 : {:?}",values_mask_max,values_mask_min,values_mask_max2,values_mask_min2);
+    return  f64::abs( (((values_mask_max2.0/values_mask_min2.0)/(values_mask_max.0/values_mask_min.0))-1.)*100.)
+            *f64::log2(image_size as f64 )/f64::log2(1920.*1080.);
     
 }
 

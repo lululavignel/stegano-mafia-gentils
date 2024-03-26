@@ -9,7 +9,7 @@ working_dir=f"{str(Path.home())}/Images/steg"
 
 class data_meth:
     def __init__(self) -> None:
-        self.methods={"SE0xFF":{},"SE0x03":{},"SER0x02":{}}
+        self.methods={"SE0xFF":{},"SE0x03":{},"SE0x02":{},"SER0x02":{},"SER0x03":{}}
         self.steganograph={"s256-c-p": self.methods.copy()}
 
     def add_data(self,data, method, steg, percentage):
@@ -21,7 +21,7 @@ class data_meth:
         return self.steganograph[steg][method]
     
 
-methods={"SE0xFF":[{}],"SE0x03":[{}],"SER0x02":[{}]}
+methods={"SE0xFF":[{}],"SE0x03":[{}],"SE0x02":[{}],"SER0x02":[{}],"SER0x03":[{}]}
 steganograph={"s256-c-p": [methods.copy()]}
 steg_meths=["s256-c-p"]
 data_aggregator=data_meth()
@@ -42,6 +42,7 @@ for top_dirnames in os.listdir(working_dir):
                 data = file.readlines()
                 file.close()
                 for line in data:
+                    print("? ",line)
                     value = float(line.split(";")[-1].strip())
                     for steg in steg_meths:
                         print("aaaaaaa   ",value,method,steg)
@@ -85,7 +86,7 @@ for method in data_aggregator.methods.keys():
         while a> 0.99999:
             a/=10
         ordered_keys[i]=a*100
-    plt.boxplot(printable_data,labels=ordered_keys)
+    plt.boxplot(printable_data,labels=ordered_keys,showfliers=False)
     #plt.yscale("log")
     plt.xlabel("Pourcentage de la capacité max de stéganographie")
     plt.ylabel("Score du test de stéganalyse")
