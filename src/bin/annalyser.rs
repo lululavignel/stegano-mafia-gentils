@@ -289,7 +289,7 @@ mod test_annalyzer{
     }
     #[test]
     fn khi_annalyser(){
-        let mut cur_str="images/celeste-3-1.0-sha2-p-c.png";
+        let mut cur_str="images/christmas.jpg";
         let mut image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
         let mut result = khi_squared_analysis_windowed(&image, 2,3); 
         println!("result : {}",result);
@@ -299,15 +299,17 @@ mod test_annalyzer{
         result = khi_squared_analysis_windowed(&image, 2,3);  
         println!("result : {}",result);
         */
-        cur_str= "images/earth-1.0-sha2-p-c.png";
-        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
-        result = khi_squared_analysis_windowed(&image, 2,3);  
-        println!("result : {}",result);
 
-        cur_str= "images/earth-1.0-sha2-p-c.png";
-        image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
-        result = khi_squared_analysis_windowed(&image, 2,11);  
-        println!("result : {}",result);
+        // cur_str= "images/cc.png";
+        // image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        // result = khi_squared_analysis_windowed(&image, 2,3);  
+        // println!("result : {}",result);
+
+        // cur_str= "images/0_1698750559306.png";
+        // image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        // result = khi_squared_analysis_windowed(&image, 2,11);  
+        // println!("result : {}",result);
+
         /*
         cur_str= "images/earth-0.5-sha2-p-c.png";
         image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
