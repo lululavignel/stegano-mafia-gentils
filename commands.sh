@@ -1,0 +1,1 @@
+./target/release/annalyser -t lsb -i images/IMG_20231017_164521.png images/aah.png

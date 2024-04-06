@@ -1,3 +1,8 @@
+mod annalyser;
+pub mod test_procedure;
+pub mod shannon_entropy;
+pub mod rs;
+
 fn main() {
     let img = image::open("cc.png").unwrap().to_rgb8();
     let rgb: Vec<u8> = img.into_raw();

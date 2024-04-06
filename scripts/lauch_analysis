@@ -1,0 +1,1 @@
+cargo test r --package stegano_project --bin stegano_project -- test_procedure::test_test_proc::test_default_test --exact --nocapture 

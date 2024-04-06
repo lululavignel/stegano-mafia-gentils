@@ -1,7 +1,16 @@
 
 
-use image::{RgbImage, ImageBuffer, Rgb};
+use std::ops::Div;
 
+use image::{RgbImage, ImageBuffer, Rgb};
+use num::traits::Pow;
+use statrs::distribution::*;
+
+/**
+ * Calculer les fréquences des valeurs des derniers bits de chaque composante de couleur dans une image.
+ * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
+ * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel.
+ */
 pub fn stats_last_bits(img : & RgbImage,bytes: i32)->Vec<u32>{
     let array_size= i32::pow(2,bytes as u32) as usize;
     let mut bits_count= vec![0;array_size];
@@ -15,8 +24,44 @@ pub fn stats_last_bits(img : & RgbImage,bytes: i32)->Vec<u32>{
         }
     }
     return bits_count;
-
 }
+
+
+/**
+ * Variante de la fonction précedente 'stats_last_bits' qui analyse uniqument la zone indiquée.
+ * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
+ * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel.
+ * @param x_min: u32: La coordonnée minimale en x de la zone à traiter.
+ * @param x_max: u32: La coordonnée maximale en x de la zone à traiter.
+ * @param y_min: u32: La coordonnée minimale en y de la zone à traiter.
+ * @param y_max: u32: La coordonnée maximale en y de la zone à traiter.
+ */
+pub fn stats_last_bits_zone(img: &RgbImage, bytes: i32, x_min: u32, x_max: u32, y_min: u32, y_max: u32) -> Vec<u32> {
+    let array_size = i32::pow(2, bytes as u32) as usize;
+    let mut bits_count = vec![0; array_size];
+    let mut mask: u8 = 0;
+
+    for _ in 0..bytes {
+        mask = (mask << 1) | 1;
+    }
+
+    for x in x_min..=x_max {
+        for y in y_min..=y_max {
+            if x < img.width() && y < img.height() {
+                let pixel = img.get_pixel(x, y);
+                let colors = [pixel[0], pixel[1], pixel[2]];
+
+                for &val in &colors {
+                    bits_count[(val & mask) as usize] += 1;
+                }
+            }
+        }
+    }
+
+    return bits_count;
+}
+
+
 pub fn diff_img_create(img : & RgbImage, bytes : i32)-> RgbImage{
     if (bytes<0) & (bytes>=8){
         panic!("bytes must be positive and strictly inferior to 9");
@@ -66,6 +111,105 @@ fn distance(p1: &Rgb<u8>, p2: &Rgb<u8>,msk:u8,shift:u8)-> Rgb<u8>{
     return rgb;
 }
 
+/**
+ * Test du Khi Carré pour une image donnée
+ * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
+ * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel. Il détermine aussi le degré de liberté dans ce test.
+ */ 
+fn khi_squared_analysis(img : & RgbImage, bytes_to_analyse : u32)-> f64{ //TODO rgb *3 ?
+
+    //Pour le test de conformité, degres_liberte = nb_categories-1
+    let degres_liberte: f64 = 3.0; //TODO : à adapter
+    let categories = 2u32.pow(bytes_to_analyse);
+
+    //Initialiser le vecteur attendu pour le test (répartition homogène des pixels)
+    let (largeur, hauteur) = img.dimensions();
+    let nb_pixels: u32 = largeur * hauteur;
+    let repartition_pixels = nb_pixels/categories;
+
+    //TODO vecteur de taille "categories"
+    //let frequence_pixel_attendue: Vec<u32> = vec![repartition_pixels, repartition_pixels, repartition_pixels, repartition_pixels]; 
+    let frequence_pixel_attendue: Vec<u32> = vec![repartition_pixels*3; categories as usize]; //TODO probabilités d'obtenir chaque lettre
+    println!("nombre de pixels attendus pour chaque catégorie : {}",frequence_pixel_attendue[0]);
+
+    //Générer le vecteur de la répartition des pixels de l'image
+    let frequence_pixel_observee = stats_last_bits(img, bytes_to_analyse as i32);
+    for p in 0..categories{
+        println!("vecteur observee {}: {}", p, frequence_pixel_observee[p as usize]);
+    }
+
+    //Calcul pour comparaison entre le vecteur attendu et observé
+    let mut sum_khi = 0.0;
+    for i in 0..categories {
+        let diff = frequence_pixel_observee[i as usize] as i64 - frequence_pixel_attendue[i as usize] as i64;
+        let squared_diff = (diff as i64).pow(2);
+        let result = squared_diff as f64 / frequence_pixel_attendue[i as usize] as f64;
+        println!("{:.4}", result);
+        sum_khi += result;
+        println!("i:  {:?}     sum_khi:{:?}", i, sum_khi);
+    }
+    
+    //Calcul de l'indice de confiance graĉe à khi carré
+    let khi_squared = ChiSquared::new(degres_liberte).unwrap();
+    //let khi_result_cdf = ContinuousCDF::cdf(&khi_squared, sum_khi); //Formule : (1 / Γ(k / 2)) * γ(k / 2, x / 2) where k is the degrees of freedom, Γ is the gamma function, and γ is the lower incomplete gamma function     (source : documentation de statrs::distribution::ChiSquared)
+    let khi_result_cdf = khi_squared.cdf(sum_khi);
+    println!("khi cdf:  {:.8}", khi_result_cdf);
+
+    return khi_result_cdf;
+}
+
+
+/**
+ * Test du Khi Carré pour une image donnée
+ * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
+ * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel. Il détermine aussi le degré de liberté dans ce test.
+ */ 
+fn khi_squared_analysis_simple(img_original : & RgbImage, img_modified : & RgbImage, bytes_to_analyse : u32)-> f64{ //TODO rgb *3 ?
+
+    //Pour le test de conformité, degres_liberte = nb_categories-1
+    let degres_liberte: f64 = 3.0; //TODO : à adapter
+    let categories = 2u32.pow(bytes_to_analyse);
+
+    //Initialiser le vecteur attendu pour le test (répartition homogène des pixels)
+    let (largeur, hauteur) = img_original.dimensions();
+    let nb_pixels: u32 = largeur * hauteur;
+    let repartition_pixels = nb_pixels/categories;
+
+    //TODO vecteur de taille "categories"
+    //Générer le vecteur de la répartition des pixels de l'image
+    let frequence_pixel_attendue = stats_last_bits(img_original, bytes_to_analyse as i32);
+    for p in 0..categories{
+        println!("vecteur attendu {}: {}", p, frequence_pixel_attendue[p as usize]);
+    }
+
+    //Générer le vecteur de la répartition des pixels de l'image
+    let frequence_pixel_observee = stats_last_bits(img_modified, bytes_to_analyse as i32);
+    for p in 0..categories{
+        println!("vecteur observe {}: {}", p, frequence_pixel_observee[p as usize]);
+    }
+
+    //Calcul pour comparaison entre le vecteur attendu et observé
+    let mut sum_khi = 0.0;
+    for i in 0..categories {
+        let diff = frequence_pixel_observee[i as usize] as i64 - frequence_pixel_attendue[i as usize] as i64;
+        let squared_diff = (diff as i64).pow(2);
+        let result = squared_diff as f64 / frequence_pixel_attendue[i as usize] as f64;
+        println!("{:.4}", result);
+        sum_khi += result;
+        println!("i:  {:?}     sum_khi:{:?}", i, sum_khi);
+    }
+    
+    //Calcul de l'indice de confiance graĉe à khi carré
+    let khi_squared = ChiSquared::new(degres_liberte).unwrap();
+    //let khi_result_cdf = ContinuousCDF::cdf(&khi_squared, sum_khi); //Formule : (1 / Γ(k / 2)) * γ(k / 2, x / 2) where k is the degrees of freedom, Γ is the gamma function, and γ is the lower incomplete gamma function     (source : documentation de statrs::distribution::ChiSquared)
+    let khi_result_cdf = khi_squared.cdf(sum_khi);
+    println!("khi cdf:  {:.8}", khi_result_cdf);
+
+    return khi_result_cdf;
+}
+
+
+///// Modules de test ///////////////////////////////////////////////////////////////////////////
 #[cfg(test)]
 mod test_annalyzer{
     
@@ -111,6 +255,22 @@ mod test_annalyzer{
         let image= ImageReader::open("./img/photo/secret/".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
         diff_img_create(&image, 2).save("./img/photo/trnsfrm/sec-".to_owned()+ cur_str).unwrap();
         
+    }
+
+    #[test]
+    fn khi_annalyser(){
+        let cur_str="images/results/christmas-sha256.jpg";
+        let image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        let result = khi_squared_analysis(&image, 1);
+    }
+
+    #[test]
+    fn khi_annalyser_simple(){
+        let cur_str="images/results/christmas-sha256.jpg";
+        let image_modified= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        let cur_str2="images/christmas.jpg";
+        let image_original= ImageReader::open("./".to_owned()+cur_str2).unwrap().decode().unwrap().to_rgb8();
+        let result = khi_squared_analysis_simple(&image_original, &image_original, 1);
     }
 
 }
