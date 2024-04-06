@@ -1,11 +1,12 @@
 let users = {};
 
 class User {
-    constructor(name, email, hashedPassword, publicKey) {
+    constructor(name, email, hashedPassword, publicKey, userType) {
         this.name = name;
         this.email = email;
         this.hashedPassword = hashedPassword; // Hash the password
         this.publicKey = publicKey;
+        this.userType = userType;
 
         this.active = false;
         this.subscriptions = [];
@@ -38,12 +39,16 @@ class User {
         return this.publicKey;
     }
 
+    getIsMafia() {
+        return this.isMafia;
+    }
+
 }
 
 module.exports = {
     addUser: (data) => {
-        const { username, email, hashedPassword, publicKey } = data;
-        const user = new User(username, email, hashedPassword, publicKey);
+        const { username, email, hashedPassword, publicKey, userType } = data;
+        const user = new User(username, email, hashedPassword, publicKey, userType);
         users[username] = user;
         return user;
     },

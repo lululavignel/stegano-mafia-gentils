@@ -16,7 +16,6 @@ async function run() {
 
     const secretMessage = decrypt_message(base64Image);
     console.log('Secret Message:', secretMessage);
-    console.log("prout");
 }
 
 // Helper function to convert an HTMLImageElement to base64

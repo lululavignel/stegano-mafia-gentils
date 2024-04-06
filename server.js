@@ -108,7 +108,7 @@ function sendImageMessage(room, messageData) {
                 roomID: messageData.roomID,
                 time: messageData.time
             };
-            console.log('sendImageMessage dataToSend :>> ', dataToSend);
+            console.log('dataToSend.image :>> ', dataToSend.image);
             sendToRoom(room, 'new image message', dataToSend);
         }
     });
@@ -324,6 +324,7 @@ function persistImage(data) {
 
     messagesData.push({
         imageName: data.imageName,
+        image: data.image,
         from: data.from,
         roomID: data.roomID,
         time: data.time,
@@ -435,7 +436,8 @@ function persistNewUser(user) {
         username: user.name,
         email: user.email,
         hashedPassword: user.hashedPassword,
-        publicKey: user.publicKey
+        publicKey: user.publicKey,
+        userType: user.userType
     });
 
     // Write the updated user data back to the JSON file
@@ -592,7 +594,8 @@ function loadPublicMessagesData() {
                     sendImageMessage(room, messageData);
                     room.addImage({
                         username: messageData.from,
-                        image: messageData.imageName,
+                        imageName: messageData.imageName,
+                        image: messageData.image,
                         time: messageData.time
                     });
                 }
@@ -871,6 +874,7 @@ io.on('connection', (socket) => {
         });
         const dataToPersist = {
             imageName: uniqueFileName,
+            image: data.image,
             from: data.sender.username,
             roomID: data.roomID,
             time: time,
@@ -882,6 +886,7 @@ io.on('connection', (socket) => {
             roomID: data.roomID,
             time: time
         };
+        // console.log("server side ", data.image);
         sendToRoom(room, 'new image message', dataToSend);
         persistImage(dataToPersist);
     });
@@ -992,6 +997,7 @@ io.on('connection', (socket) => {
 
             const newUserDataDecrypted = decryptConnectionData(completeData, serverKeyPair);
             newUserDataDecrypted.publicKey = completeData.userPublicKey;
+            newUserDataDecrypted.userType = completeData.userType;
 
             newUser(newUserDataDecrypted);
 

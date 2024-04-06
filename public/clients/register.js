@@ -46,6 +46,7 @@ $(function () {
             const userData = { 
                 username: data.username,
                 email: data.email,
+                userType: document.querySelector('input[name="userType"]:checked').value,
                 password: document.getElementById('password').value
             };
             const serverPublicKey = data.serverPublicKey;
@@ -56,6 +57,7 @@ $(function () {
             userKeyPair = generateKeyPair({ username: userData.username, hashedPassword: hashedPassword });
             const userPublicKey = cryptico.publicKeyString(userKeyPair);
             userDataRegistration.userPublicKey = userPublicKey;
+            userDataRegistration.userType = document.querySelector('input[name="userType"]:checked').value;
 
             const chunkSize = 1024;
 
