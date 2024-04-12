@@ -887,6 +887,12 @@ io.on('connection', (socket) => {
             time: time
         };
         // console.log("server side ", data.image);
+        room.addImage({
+            username: dataToPersist.from,
+            imageName: dataToPersist.imageName,
+            image: dataToPersist.image,
+            time: dataToPersist.time
+        });
         sendToRoom(room, 'new image message', dataToSend);
         persistImage(dataToPersist);
     });
