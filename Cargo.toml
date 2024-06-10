@@ -1,20 +1,24 @@
 [package]
-name = "stegano_project"
+name = "steganomafia"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
-getrandom = { version = "0.2.10", features = ["js"] }
-wasm-bindgen = "0.2"
-base64 = "0.12"
+hex-literal = "0.4.1"
 image = "0.24.7"
 imageproc = "0.23.0"
 num = "0.4.1"
 rand = "0.8.5"
-clap = "2"
-statrs = "0.14"
+sha2 = "0.10.8"
+clap = "3"
+sha3 = "0.10.8"
+md-5 = "0.10.6"
+
+openssl = { version = "0.10.62", features = ["vendored"] }
+anstyle = "1.0.7"
+
+[dependencies.show-image]
+version= "0.13.1"
+features = ["image"]

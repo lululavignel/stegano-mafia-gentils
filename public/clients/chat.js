@@ -479,17 +479,22 @@ $(function () {
         document.getElementById('image-form').reset();
     });
 
-    function handleImageFile(imageFile, description, dropdownChoice) {
+    function handleImageFile(imageFile, secretMessage, dropdownChoice) {
         // Check if it's an image file (you can add more validation)
         console.log('Handling image file:', imageFile);
-        console.log('Description:', description);
+        console.log('secretMessage:', secretMessage);
         console.log('Dropdown choice:', dropdownChoice);
         if (imageFile.type.startsWith('image/')) {
             const reader = new FileReader();
     
             reader.onload = (event) => {
                 const imageData = event.target.result;
-                sendImage(imageData);
+                const data = {
+                    image: imageData,
+                    secretMessage: secretMessage,
+                    stegaChoice: dropdownChoice
+                }
+                sendImage(data);
             };
     
             reader.readAsDataURL(imageFile);
@@ -524,7 +529,9 @@ $(function () {
             // Send the image as a message
             const msg = {
                 sender: user,
-                image: imageData,  // imageData is the base64 data URI of the image
+                image: imageData.image,  // imageData is the base64 data URI of the image
+                secretMessage: secretMessage,
+                stegaChoice: dropdownChoice,
                 roomID: currentRoom.id,
             };
             socket.emit('new image message', msg);

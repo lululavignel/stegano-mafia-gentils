@@ -865,6 +865,8 @@ io.on('connection', (socket) => {
         const uniqueFileName = `${data.roomID}_${time}.png`;
         const imagePath = `${imageFolder}/${uniqueFileName}`;
 
+        // TODO: Demain aleks tu t'assures que la data arrive bien càd avec l'info sur le message caché et la méthode de stéga et tu save dans la db too...
+
         // Save the image to the specified folder
         fs.writeFile(imagePath, data.image, 'base64', (err) => {
             if (err) {

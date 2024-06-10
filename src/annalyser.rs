@@ -1,16 +1,7 @@
 
 
-use std::ops::Div;
-
 use image::{RgbImage, ImageBuffer, Rgb};
-use num::traits::Pow;
-use statrs::distribution::*;
-
-/**
- * Calculer les fréquences des valeurs des derniers bits de chaque composante de couleur dans une image.
- * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
- * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel.
- */
+#[allow(dead_code)]
 pub fn stats_last_bits(img : & RgbImage,bytes: i32)->Vec<u32>{
     let array_size= i32::pow(2,bytes as u32) as usize;
     let mut bits_count= vec![0;array_size];
@@ -24,49 +15,14 @@ pub fn stats_last_bits(img : & RgbImage,bytes: i32)->Vec<u32>{
         }
     }
     return bits_count;
+
 }
-
-
-/**
- * Variante de la fonction précedente 'stats_last_bits' qui analyse uniqument la zone indiquée.
- * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
- * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel.
- * @param x_min: u32: La coordonnée minimale en x de la zone à traiter.
- * @param x_max: u32: La coordonnée maximale en x de la zone à traiter.
- * @param y_min: u32: La coordonnée minimale en y de la zone à traiter.
- * @param y_max: u32: La coordonnée maximale en y de la zone à traiter.
- */
-pub fn stats_last_bits_zone(img: &RgbImage, bytes: i32, x_min: u32, x_max: u32, y_min: u32, y_max: u32) -> Vec<u32> {
-    let array_size = i32::pow(2, bytes as u32) as usize;
-    let mut bits_count = vec![0; array_size];
-    let mut mask: u8 = 0;
-
-    for _ in 0..bytes {
-        mask = (mask << 1) | 1;
-    }
-
-    for x in x_min..=x_max {
-        for y in y_min..=y_max {
-            if x < img.width() && y < img.height() {
-                let pixel = img.get_pixel(x, y);
-                let colors = [pixel[0], pixel[1], pixel[2]];
-
-                for &val in &colors {
-                    bits_count[(val & mask) as usize] += 1;
-                }
-            }
-        }
-    }
-
-    return bits_count;
-}
-
-
+#[allow(dead_code)]
 pub fn diff_img_create(img : & RgbImage, bytes : i32)-> RgbImage{
     if (bytes<0) & (bytes>=8){
         panic!("bytes must be positive and strictly inferior to 9");
     }
-    let mut msk: u8 = 0x1;
+    let mut msk = 0x1;
     for _ in 1..bytes{
         msk|=msk<<1;
     }
@@ -94,7 +50,7 @@ pub fn diff_img_create(img : & RgbImage, bytes : i32)-> RgbImage{
     }
     return new_img;
 }
-
+#[allow(dead_code)]
 fn distance(p1: &Rgb<u8>, p2: &Rgb<u8>,msk:u8,shift:u8)-> Rgb<u8>{
     let mut difference;
     let mut rgb=Rgb::<u8>{0:[0;3]};
@@ -110,117 +66,37 @@ fn distance(p1: &Rgb<u8>, p2: &Rgb<u8>,msk:u8,shift:u8)-> Rgb<u8>{
     }
     return rgb;
 }
-
-/**
- * Test du Khi Carré pour une image donnée
- * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
- * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel. Il détermine aussi le degré de liberté dans ce test.
- */ 
-fn khi_squared_analysis(img : & RgbImage, bytes_to_analyse : u32)-> f64{ //TODO rgb *3 ?
-
-    //Pour le test de conformité, degres_liberte = nb_categories-1
-    let degres_liberte: f64 = 3.0; //TODO : à adapter
-    let categories = 2u32.pow(bytes_to_analyse);
-
-    //Initialiser le vecteur attendu pour le test (répartition homogène des pixels)
-    let (largeur, hauteur) = img.dimensions();
-    let nb_pixels: u32 = largeur * hauteur;
-    let repartition_pixels = nb_pixels/categories;
-
-    //TODO vecteur de taille "categories"
-    //let frequence_pixel_attendue: Vec<u32> = vec![repartition_pixels, repartition_pixels, repartition_pixels, repartition_pixels]; 
-    let frequence_pixel_attendue: Vec<u32> = vec![repartition_pixels*3; categories as usize]; //TODO probabilités d'obtenir chaque lettre
-    println!("nombre de pixels attendus pour chaque catégorie : {}",frequence_pixel_attendue[0]);
-
-    //Générer le vecteur de la répartition des pixels de l'image
-    let frequence_pixel_observee = stats_last_bits(img, bytes_to_analyse as i32);
-    for p in 0..categories{
-        println!("vecteur observee {}: {}", p, frequence_pixel_observee[p as usize]);
+#[allow(dead_code)]
+fn only_lsb(img: &RgbImage) -> RgbImage{
+    let (x,y)=img.dimensions();
+    let mut new_img: RgbImage = ImageBuffer::new(x, y);
+    for (x,y,pixel) in img.enumerate_pixels(){
+        let new_pixel=new_img.get_pixel_mut(x, y);
+        new_pixel.0[0]=(pixel.0[0]&0x7)<<5;
+        new_pixel.0[1]=(pixel.0[1]&0x7)<<5;
+        new_pixel.0[2]=(pixel.0[2]&0x7)<<5;
+        
     }
-
-    //Calcul pour comparaison entre le vecteur attendu et observé
-    let mut sum_khi = 0.0;
-    for i in 0..categories {
-        let diff = frequence_pixel_observee[i as usize] as i64 - frequence_pixel_attendue[i as usize] as i64;
-        let squared_diff = (diff as i64).pow(2);
-        let result = squared_diff as f64 / frequence_pixel_attendue[i as usize] as f64;
-        println!("{:.4}", result);
-        sum_khi += result;
-        println!("i:  {:?}     sum_khi:{:?}", i, sum_khi);
-    }
-    
-    //Calcul de l'indice de confiance graĉe à khi carré
-    let khi_squared = ChiSquared::new(degres_liberte).unwrap();
-    //let khi_result_cdf = ContinuousCDF::cdf(&khi_squared, sum_khi); //Formule : (1 / Γ(k / 2)) * γ(k / 2, x / 2) where k is the degrees of freedom, Γ is the gamma function, and γ is the lower incomplete gamma function     (source : documentation de statrs::distribution::ChiSquared)
-    let khi_result_cdf = khi_squared.cdf(sum_khi);
-    println!("khi cdf:  {:.8}", khi_result_cdf);
-
-    return khi_result_cdf;
+    return new_img;
 }
-
-
-/**
- * Test du Khi Carré pour une image donnée
- * @param img: &RgbImage: Une référence à une image avec un format de couleur RGB. Chaque pixel de cette image est représenté par trois valeurs (rouge, vert, bleu).
- * @param bytes: i32: Le nombre de derniers bits à considérer dans chaque composante de couleur du pixel. Il détermine aussi le degré de liberté dans ce test.
- */ 
-fn khi_squared_analysis_simple(img_original : & RgbImage, img_modified : & RgbImage, bytes_to_analyse : u32)-> f64{ //TODO rgb *3 ?
-
-    //Pour le test de conformité, degres_liberte = nb_categories-1
-    let degres_liberte: f64 = 3.0; //TODO : à adapter
-    let categories = 2u32.pow(bytes_to_analyse);
-
-    //Initialiser le vecteur attendu pour le test (répartition homogène des pixels)
-    let (largeur, hauteur) = img_original.dimensions();
-    let nb_pixels: u32 = largeur * hauteur;
-    let repartition_pixels = nb_pixels/categories;
-
-    //TODO vecteur de taille "categories"
-    //Générer le vecteur de la répartition des pixels de l'image
-    let frequence_pixel_attendue = stats_last_bits(img_original, bytes_to_analyse as i32);
-    for p in 0..categories{
-        println!("vecteur attendu {}: {}", p, frequence_pixel_attendue[p as usize]);
-    }
-
-    //Générer le vecteur de la répartition des pixels de l'image
-    let frequence_pixel_observee = stats_last_bits(img_modified, bytes_to_analyse as i32);
-    for p in 0..categories{
-        println!("vecteur observe {}: {}", p, frequence_pixel_observee[p as usize]);
-    }
-
-    //Calcul pour comparaison entre le vecteur attendu et observé
-    let mut sum_khi = 0.0;
-    for i in 0..categories {
-        let diff = frequence_pixel_observee[i as usize] as i64 - frequence_pixel_attendue[i as usize] as i64;
-        let squared_diff = (diff as i64).pow(2);
-        let result = squared_diff as f64 / frequence_pixel_attendue[i as usize] as f64;
-        println!("{:.4}", result);
-        sum_khi += result;
-        println!("i:  {:?}     sum_khi:{:?}", i, sum_khi);
-    }
-    
-    //Calcul de l'indice de confiance graĉe à khi carré
-    let khi_squared = ChiSquared::new(degres_liberte).unwrap();
-    //let khi_result_cdf = ContinuousCDF::cdf(&khi_squared, sum_khi); //Formule : (1 / Γ(k / 2)) * γ(k / 2, x / 2) where k is the degrees of freedom, Γ is the gamma function, and γ is the lower incomplete gamma function     (source : documentation de statrs::distribution::ChiSquared)
-    let khi_result_cdf = khi_squared.cdf(sum_khi);
-    println!("khi cdf:  {:.8}", khi_result_cdf);
-
-    return khi_result_cdf;
-}
-
-
-///// Modules de test ///////////////////////////////////////////////////////////////////////////
 #[cfg(test)]
 mod test_annalyzer{
     
 
+    use std::{fs::File, io::Read, path::Path};
+
+    use crate::{lsb::{ASCIIEncoding, CharEncoding}, position_by_hash::HashIterator};
+
+    use crate::lsb;
+
     use super::*;
     use image::io::Reader as ImageReader;
+    use lsb::lsb_hide_msg;
     #[test]
     fn test_key_io(){
-        let image1 = ImageReader::open("./photo.jpg").unwrap().decode().unwrap().to_rgb8();
-        let image2 = ImageReader::open("./steg_with_key.jpg").unwrap().decode().unwrap().to_rgb8();
-        let image3 = ImageReader::open("./steg.jpg").unwrap().decode().unwrap().to_rgb8();
+        let image1 = ImageReader::open("./unit_tests/in/annalyser/celeste-3-0.1-sha2-n-c.png").unwrap().decode().unwrap().to_rgb8();
+        let image2 = ImageReader::open("./unit_tests/in/annalyser/celeste-3-0.5-sha2-n-c.png").unwrap().decode().unwrap().to_rgb8();
+        let image3 = ImageReader::open("./unit_tests/in/annalyser/celeste-3-1.0-sha2-n-c.png").unwrap().decode().unwrap().to_rgb8();
         
         let res1 = stats_last_bits(&image1,2);
         let res2 = stats_last_bits(&image2,2);
@@ -231,7 +107,59 @@ mod test_annalyzer{
     }
 
     #[test]
+    fn test_only_lsb(){
+        //let image= ImageReader::open("./unit_tests/in/modified_img/celeste-3-n-n-c.png").unwrap().decode().unwrap().to_rgb8();
+        //only_lsb(&image).save("./tests/results/celeste-3-n-n-c-lsb_only.png").unwrap();
+        /*test_only_lsb_with_name("celeste-3-1.0-n-n-c.png");
+        test_only_lsb_with_name("celeste-3-0.5-n-n-c.png");
+        test_only_lsb_with_name("celeste-3-0.3-n-n-c.png");
+        test_only_lsb_with_name("celeste-3-0.2-n-n-c.png");
+        test_only_lsb_with_name("celeste-3-0.1-n-n-c.png");*/
+        /* 
+        ./target/release/steg -w -l -i ./tests/celeste-3.png ./tests/results/celeste-3-0.5-sha2-p-c.png -t long.txt -g sha256 -c aes_key -p 0.50
+        ./target/release/steg -w -l -i ./tests/celeste-3.png ./tests/results/celeste-3-1.0-sha2-p-c.png -t long.txt -g sha256 -c aes_key -p 0.999
+        ./target/release/steg -w -l -i ./tests/earth.png ./tests/results/earth-1.0-sha2-p-c.png -t verylong.txt -g sha256 -c aes_key -p 0.999
+        */
+        test_only_lsb_with_name("celeste-3-1.0-sha2-n-c.png",0.99);
+        test_only_lsb_with_name("celeste-3-0.5-sha2-n-c.png",0.5);
+        test_only_lsb_with_name("celeste-3-0.3-sha2-n-c.png",0.3);
+        test_only_lsb_with_name("celeste-3-0.2-sha2-n-c.png",0.2);
+        test_only_lsb_with_name("celeste-3-0.1-sha2-n-c.png",0.1);
+    }
+    fn test_only_lsb_with_name(cur_str:&str,percentage:f32){
+        let full_name="./unit_tests/in/annalyser/".to_owned()+ cur_str;
+        let mut image;
+        if !Path::exists(Path::new(&full_name)){
+            let mut text_file = File::open("./unit_tests/in/verylong.txt").unwrap();
+            let mut buffer =Vec::<u8>::new();
+            text_file.read_to_end(&mut buffer).unwrap();
+            
+            image= ImageReader::open("./unit_tests/in/default_img/celeste-3.png").unwrap().decode().unwrap().to_rgb8();
+            let dimensions = image.dimensions();
+            let total_bytes = ((dimensions.0*dimensions.1*3*2)/8) as f32;
+            let used_bytes = (total_bytes*percentage) as usize;
+            let encoding: Box<dyn CharEncoding> = Box::new(ASCIIEncoding);
+            buffer.truncate(used_bytes);
+            lsb_hide_msg::<HashIterator<sha2::Sha256>>(&buffer, encoding.as_ref() ,None,&mut image);
+            image.save(&full_name).unwrap();
+        }
+        else{
+            image= ImageReader::open(&full_name).unwrap().decode().unwrap().to_rgb8();
+        
+        }
+        let full_name="./unit_tests/out/annalyser/".to_owned()+ cur_str;
+        diff_img_create(&image, 2).save(&full_name).unwrap();
+    }
+    #[test]
     fn try_img_delta(){
+        let  image = ImageReader::open("./unit_tests/in/default_img/maddy-pfff.png").unwrap().decode().unwrap().to_rgb8();
+        only_lsb(&image).save("./unit_tests/out/annalyser/lsb-maddy-pfff.png").unwrap();
+        diff_img_create(&image, 3).save("./unit_tests/out/annalyser/delta/none-maddy-pfff.png").unwrap();
+        
+        let  image = ImageReader::open("./unit_tests/out/pvd/earth.png").unwrap().decode().unwrap().to_rgb8();
+        only_lsb(&image).save("./unit_tests/out/annalyser/earth.png").unwrap();
+        diff_img_create(&image, 3).save("./unit_tests/out/earth.png").unwrap();
+        //image.save("./unit_tests/out/pvd/madeline-pfff.png").unwrap();
         /*
         let image= ImageReader::open("./img/photo/celeste-.png").unwrap().decode().unwrap().to_rgb8();
         diff_img_create(&image, 2).save("./img/photo/trnsfrm/celeste-_2.png").unwrap();
@@ -248,29 +176,16 @@ mod test_annalyzer{
         let image= ImageReader::open(cur_str).unwrap().decode().unwrap().to_rgb8();
         diff_img_create(&image, 2).save("./img/photo/trnsfrm/".to_owned()+ cur_str).unwrap();
         */
-        let cur_str="vile-foret-hash512.png";
-        let image= ImageReader::open("./img/photo/secret/".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
+        /*let cur_str: &str="vile-foret-hash512.png";
+        let image= ImageReader::open("./unit_tests/in/modified_img/".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
         diff_img_create(&image, 2).save("./img/photo/trnsfrm/".to_owned()+ cur_str).unwrap();
-        let cur_str="maddy-pfff.png";
+        let cur_str="hash-celeste-3.png";
         let image= ImageReader::open("./img/photo/secret/".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
         diff_img_create(&image, 2).save("./img/photo/trnsfrm/sec-".to_owned()+ cur_str).unwrap();
+        let image= ImageReader::open("a.png").unwrap().decode().unwrap().to_rgb8();
+        diff_img_create(&image, 2).save("a2.png").unwrap();
+        */
         
-    }
-
-    #[test]
-    fn khi_annalyser(){
-        let cur_str="images/results/christmas-sha256.jpg";
-        let image= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
-        let result = khi_squared_analysis(&image, 1);
-    }
-
-    #[test]
-    fn khi_annalyser_simple(){
-        let cur_str="images/results/christmas-sha256.jpg";
-        let image_modified= ImageReader::open("./".to_owned()+cur_str).unwrap().decode().unwrap().to_rgb8();
-        let cur_str2="images/christmas.jpg";
-        let image_original= ImageReader::open("./".to_owned()+cur_str2).unwrap().decode().unwrap().to_rgb8();
-        let result = khi_squared_analysis_simple(&image_original, &image_original, 1);
     }
 
 }
