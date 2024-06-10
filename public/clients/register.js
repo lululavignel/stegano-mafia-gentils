@@ -87,6 +87,7 @@ $(function () {
             setCookie("hashedPassword", userDecrypted.hashedPassword, 7);
             setCookie("email", userDecrypted.email, 7);
             setCookie("serverPublicKey", data.serverPublicKey, 7);
+            setCookie("userType", data.userType, 7);
 
             window.location.href = '/chat.html';
         });

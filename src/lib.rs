@@ -46,6 +46,7 @@ pub fn decrypt_message(base64_image: &str) -> String {
 }
 
 
+
 pub trait ImgIterator {
     fn new(width: u32, height: u32) -> Self where Self: Sized;
     fn next(&mut self) -> Option<(u32, u32, usize)>;

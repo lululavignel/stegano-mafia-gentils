@@ -11,6 +11,7 @@ $(function () {
     const username = getCookie('username');
     const hashedPassword = getCookie('hashedPassword');
     const email = getCookie('email');
+    const userType = getCookie('userType');
     const serverPublicKey = getCookie('serverPublicKey');
     if (username && hashedPassword)
         userKeyPair = generateKeyPair({ username, hashedPassword });
@@ -257,13 +258,58 @@ $(function () {
     // USEFUL //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
 
-    // Function to add an image to the chat
+    $(document).on('click', '.run-prob-algorithm', function() {
+        const username = $(this).data('username');
+        const time = $(this).data('time');
+        const imageSrc = $(this).data('image-src');
+    
+        // Envoyer les informations nécessaires au serveur
+        const data = {
+            user: username,
+            date: time,
+            source: imageSrc
+        };
+    
+        socket.emit('run_probabilistic_algorithm', data);
+    });
+
+    $(document).on('click', '.reveal-hidden-message', function() {
+        const username = $(this).data('username');
+        const time = $(this).data('time');
+        const imageSrc = $(this).data('image-src');
+    
+        // Envoyer les informations nécessaires au serveur
+        const data = {
+            user: username,
+            date: time,
+            source: imageSrc
+        };
+    
+        socket.emit('reveal_hidden_message', data);
+    });    
+
     function addChatImage(username, imageSrc, timeObj) {
         let time = new Date(timeObj).toLocaleTimeString('en-US', {
             hour12: false,
             hour: "numeric",
             minute: "numeric"
         });
+    
+        let additionalButton = '';
+        if (userType === 'steganaliste') {
+            additionalButton = `
+                <button class="run-prob-algorithm" data-username="${username}" data-time="${timeObj}" data-image-src="${imageSrc}">
+                    Lancer algorithme probabiliste
+                </button>
+            `;
+        } else if (userType === 'mafia') {
+            additionalButton = `
+                <button class="reveal-hidden-message" data-username="${username}" data-time="${timeObj}" data-image-src="${imageSrc}">
+                    Retrouver le message caché
+                </button>
+            `;
+        }
+    
         $messages.append(`
             <div class="message">
                 <div class="message-avatar"></div>
@@ -271,11 +317,15 @@ $(function () {
                     <span class="message-user">${username}</span>
                     <span class="message-time">${time}</span>
                     <img src="${imageSrc}" alt="Image" class="message-image">
+                    ${additionalButton}
                 </div>
             </div>
         `);
+    
         $messages[0].scrollTop = $messages[0].scrollHeight;
     }
+    
+    
 
     function addChatMessage(msg) {
         let time = new Date(msg.time).toLocaleTimeString('en-US', {
@@ -337,6 +387,10 @@ $(function () {
 
     // Get a reference to the drop zone element
     const dropZone = document.getElementById('drop-zone');
+    const formPopup = document.getElementById('form-popup');
+    const overlay = document.getElementById('overlay');
+    const descriptionInput = document.getElementById('message-secret');
+    let droppedImageFile = null;
 
     // Prevent the default behavior of the browser when a file is dropped
     dropZone.addEventListener('dragover', (e) => {
@@ -356,10 +410,21 @@ $(function () {
 
         if (files.length > 0) {
             // Assume the first file is the image
-            const imageFile = files[0];
+            droppedImageFile = files[0];
 
-            // Handle the image file, e.g., display it or upload it
-            handleImageFile(imageFile);
+            if (userType === 'mafia') {
+                // Show the form popup and overlay
+                formPopup.style.display = 'block';
+                overlay.style.display = 'block';
+    
+                // Use a timeout to ensure the element is ready to be focused
+                setTimeout(() => {
+                    descriptionInput.focus();
+                }, 0);
+            } else {
+                handleImageFile(droppedImageFile)
+            }
+
         }
     });
 
@@ -372,24 +437,78 @@ $(function () {
         document.body.appendChild(fileInput);
 
         fileInput.addEventListener('change', (e) => {
-            const imageFile = e.target.files[0];
-            handleImageFile(imageFile);
+            const files = e.target.files;
+
+            if (files.length > 0) {
+                // Assume the first file is the image
+                droppedImageFile = files[0];
+
+                if (userType === 'mafia') {
+                    // Show the form popup and overlay
+                    formPopup.style.display = 'block';
+                    overlay.style.display = 'block';
+        
+                    // Use a timeout to ensure the element is ready to be focused
+                    setTimeout(() => {
+                        descriptionInput.focus();
+                    }, 0);
+                } else {
+                    handleImageFile(droppedImageFile)
+                }
+            }
         });
 
         fileInput.click();
     });
 
-    // Handle the selected image file
-    function handleImageFile(imageFile) {
+    document.getElementById('image-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+    
+        // Here you can collect form data if needed
+        const description = document.getElementById('message-secret').value;
+        const dropdownChoice = document.getElementById('dropdown-choice').value;
+    
+        // Process the image file after form submission
+        handleImageFile(droppedImageFile, description, dropdownChoice);
+    
+        // Hide the form popup and overlay
+        formPopup.style.display = 'none';
+        overlay.style.display = 'none';
+    
+        // Reset the form
+        document.getElementById('image-form').reset();
+    });
+
+    function handleImageFile(imageFile, description, dropdownChoice) {
         // Check if it's an image file (you can add more validation)
+        console.log('Handling image file:', imageFile);
+        console.log('Description:', description);
+        console.log('Dropdown choice:', dropdownChoice);
         if (imageFile.type.startsWith('image/')) {
             const reader = new FileReader();
-
+    
             reader.onload = (event) => {
                 const imageData = event.target.result;
-                sendImage(imageData)
+                sendImage(imageData);
             };
+    
+            reader.readAsDataURL(imageFile);
+        } else {
+            alert('Please select a valid image file.');
+        }
+    }
 
+    function handleImageFile(imageFile) {
+        // Check if it's an image file (you can add more validation)
+        console.log('Handling image file:', imageFile);
+        if (imageFile.type.startsWith('image/')) {
+            const reader = new FileReader();
+    
+            reader.onload = (event) => {
+                const imageData = event.target.result;
+                sendImage(imageData);
+            };
+    
             reader.readAsDataURL(imageFile);
         } else {
             alert('Please select a valid image file.');
@@ -412,29 +531,30 @@ $(function () {
         }
     }
 
+
     /////////////////////
     // Keyboard events //
     /////////////////////
 
     $window.keydown(event => {
-        if (modalShowing)
+        // Check if the modalShowing variable is true or if the form popup is visible
+        if (modalShowing || formPopup.style.display === 'block') {
             return;
-
+        }
+    
         // Autofocus the current input when a key is typed
         if (!(event.ctrlKey || event.metaKey || event.altKey)) {
             $inputMessage.focus();
         }
-
+    
         // When the client hits ENTER on their keyboard
         if (event.which === 13) {
             sendMessage();
-        }
-
-        // don't add newlines
-        if (event.which === 13 || event.which === 10) {
+            // Prevent default to avoid adding new lines
             event.preventDefault();
         }
     });
+    
 
 
 
@@ -532,7 +652,6 @@ $(function () {
             room.history.push(data);
         }
 
-        // console.log('new image message data :>> ', data);
 
         if (roomId == currentRoom.id)
             addChatImage(username, imageSrc, time);

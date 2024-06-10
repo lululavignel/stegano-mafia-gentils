@@ -43,6 +43,10 @@ class User {
         return this.isMafia;
     }
 
+    getUserType() {
+        return this.userType;
+    }
+
 }
 
 module.exports = {

@@ -108,7 +108,6 @@ function sendImageMessage(room, messageData) {
                 roomID: messageData.roomID,
                 time: messageData.time
             };
-            console.log('dataToSend.image :>> ', dataToSend.image);
             sendToRoom(room, 'new image message', dataToSend);
         }
     });
@@ -137,7 +136,7 @@ function generateSymmetricKey() {
  *     - encryptedSymmetricKey {string} - The encrypted symmetric key.
  */
 function encryptConnectionData(data, publicKey) {
-    const { username, email, hashedPassword } = data;
+    const { username, email, hashedPassword, userType } = data;
     const symmetricKeyEncrypt = generateSymmetricKey().toString();
     const encryptedHashedPassword = CryptoJS.AES.encrypt(hashedPassword, symmetricKeyEncrypt).toString();
     const encryptedEmail = CryptoJS.AES.encrypt(email, symmetricKeyEncrypt).toString();
@@ -147,7 +146,8 @@ function encryptConnectionData(data, publicKey) {
         username: username,
         email: encryptedEmail,
         encryptedHashedPassword: encryptedHashedPassword,
-        encryptedSymmetricKey: encryptedSymmetricKey
+        encryptedSymmetricKey: encryptedSymmetricKey,
+        userType: userType
     };
 
     return userDataRegistration;
@@ -168,7 +168,7 @@ function encryptConnectionData(data, publicKey) {
  *     - hashedPassword {string} - The decrypted hashed password.
  */
 function decryptConnectionData(data, privateKey) {
-    const { username, email, encryptedHashedPassword, encryptedSymmetricKey } = data;
+    const { username, email, encryptedHashedPassword, encryptedSymmetricKey, userType } = data;
     const decryptedSymmetricKey = cryptico.decrypt(encryptedSymmetricKey, privateKey).plaintext.toString();
     const decryptedHashedPassword = CryptoJS.AES.decrypt(encryptedHashedPassword, decryptedSymmetricKey).toString(CryptoJS.enc.Utf8);
     const decryptedEmail = CryptoJS.AES.decrypt(email, decryptedSymmetricKey).toString(CryptoJS.enc.Utf8);
@@ -176,7 +176,8 @@ function decryptConnectionData(data, privateKey) {
     const userData = {
         username: username,
         email: decryptedEmail,
-        hashedPassword: decryptedHashedPassword
+        hashedPassword: decryptedHashedPassword,
+        userType: userType
     };
 
     return userData;
@@ -886,7 +887,6 @@ io.on('connection', (socket) => {
             roomID: data.roomID,
             time: time
         };
-        // console.log("server side ", data.image);
         room.addImage({
             username: dataToPersist.from,
             imageName: dataToPersist.imageName,
@@ -980,6 +980,17 @@ io.on('connection', (socket) => {
     // USEFUL //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
 
+    socket.on('run_probabilistic_algorithm', (data) => {
+        console.log('Running probabilistic algorithm for:', data);
+    
+        
+    });
+
+    socket.on('reveal_hidden_message', (data) => {
+        console.log('Revealing hidden message for:', data);
+    
+    });
+
     // Handles the event when registering user data on the server in chunks
     socket.on('register_user_on_server_chunk', data => {
         const chunkData = data.chunkData;
@@ -1039,13 +1050,18 @@ io.on('connection', (socket) => {
             // Parse the JSON data
             const completeData = JSON.parse(userDataRegistration);
 
+            console.log('completeData :>> ', completeData);
+
             const userDataDecrypted = decryptConnectionData(completeData, serverKeyPair);
             userDataDecrypted.publicKey = completeData.userPublicKey;
 
+            console.log('userDataDecrypted :>> ', userDataDecrypted);
 
             const user = encryptConnectionData(userDataDecrypted, getPublicKeyByUsername(userDataDecrypted.username));
             if (Users.getUser(userDataDecrypted.username) && checkUserIdentity(userDataDecrypted)) {
                 user.serverPublicKey = serverPublicKey;
+                user.userType = Users.getUser(userDataDecrypted.username).getUserType();
+                console.log('user :>> ', user);
                 socket.emit('user_identified_successfully', user);
             } else {
                 socket.emit('wrong_data', user);

@@ -52,6 +52,27 @@
                 <p>Drag & Drop an Image Here</p>
             </div>
 
+            <!-- Form Popup -->
+            <div id="form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+                <form id="image-form">
+                    <label for="message-secret">Message caché à intégrer:</label>
+                    <input type="text" id="message-secret" name="message-secret">
+                    
+                    <label for="dropdown-choice">Choisissez un élément:</label>
+                    <select id="dropdown-choice" name="dropdown-choice">
+                        <option value="" disabled selected>Choisissez une option</option>
+                        <option value="lsb">LSB</option>
+                        <option value="matrix_embedding">Matrix Embedding</option>
+                        <option value="fourrier">Transformée de Fourrier</option>
+                    </select>
+                    
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+
+            <!-- Overlay -->
+            <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
             <div class="input-area">
                 <textarea id="input-message" class="inputMessage" placeholder="Type here..."></textarea>
             </div>
