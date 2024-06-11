@@ -1,1 +1,68 @@
-[]
+[
+  {
+    "id": 0,
+    "name": "random",
+    "description": "Random!",
+    "options": {
+      "forceMembership": true,
+      "private": false,
+      "direct": false
+    },
+    "members": [
+      {
+        "username": "era",
+        "email": "era@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      },
+      {
+        "username": "test",
+        "email": "test@gmail.com",
+        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "name": "general",
+    "description": "interesting things",
+    "options": {
+      "forceMembership": true,
+      "private": false,
+      "direct": false
+    },
+    "members": [
+      {
+        "username": "era",
+        "email": "era@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      },
+      {
+        "username": "test",
+        "email": "test@gmail.com",
+        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "private",
+    "description": "some very private channel",
+    "options": {
+      "forceMembership": true,
+      "private": true,
+      "direct": false
+    },
+    "members": [
+      {
+        "username": "era",
+        "email": "era@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      },
+      {
+        "username": "test",
+        "email": "test@gmail.com",
+        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      }
+    ]
+  }
+]

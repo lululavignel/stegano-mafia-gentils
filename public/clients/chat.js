@@ -492,7 +492,7 @@ $(function () {
                 const data = {
                     image: imageData,
                     secretMessage: secretMessage,
-                    stegaChoice: dropdownChoice
+                    dropdownChoice: dropdownChoice
                 }
                 sendImage(data);
             };
@@ -511,7 +511,12 @@ $(function () {
     
             reader.onload = (event) => {
                 const imageData = event.target.result;
-                sendImage(imageData);
+                const data = {
+                    image: imageData,
+                    secretMessage: "",
+                    dropdownChoice: ""
+                }
+                sendImage(data);
             };
     
             reader.readAsDataURL(imageFile);
@@ -521,7 +526,7 @@ $(function () {
     }
 
     // Function to send an image
-    function sendImage(imageData) {
+    function sendImage(data) {
         if (connected && currentRoom !== false) {
             const user = encryptConnectionDataWithoutHashing(window.user, serverPublicKey);
             const msgSymmetricKey = generateSymmetricKey().toString();
@@ -529,9 +534,9 @@ $(function () {
             // Send the image as a message
             const msg = {
                 sender: user,
-                image: imageData.image,  // imageData is the base64 data URI of the image
-                secretMessage: secretMessage,
-                stegaChoice: dropdownChoice,
+                image: data.image,  // imageData is the base64 data URI of the image
+                secretMessage: data.secretMessage,
+                stegaChoice: data.dropdownChoice,
                 roomID: currentRoom.id,
             };
             socket.emit('new image message', msg);

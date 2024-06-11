@@ -60,7 +60,6 @@ pub enum SteganographyMethod {
 
 #[wasm_bindgen]
 pub fn hide_message_image(base64_image: &str, method: SteganographyMethod, message: &str) -> Result<String, JsValue> {
-    // Decode the base64 image
     let decoded_image = decode(base64_image).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let mut image = image::load_from_memory(&decoded_image).map_err(|e| JsValue::from_str(&e.to_string()))?.to_rgb8();
 

@@ -1,4 +1,5 @@
 // TODO: on veut que lorsqu'on envoit une image une interface se présente à l'utilisateur lui proposant d'utiliser un algorithme d'encryptage, l'autre mafieux pourra faire tourner tous les algorithmes (côtés serveur pour essayer de décrypter un message d'une image) et le serveur lui renverrait le résultat de toutes ces decryptages.
+import init, { hide_message_image, SteganographyMethod  } from '../../pkg/stegano_project.js';
 
 const fs = require('fs');
 const he = require('he');
@@ -719,10 +720,10 @@ function newRoom(name, user, options) {
  * @param {User} user - The user to add to the channel.
  * @returns {Room} The created channel (room).
  */
-function newChannel(name, description, private, user) {
+function newChannel(name, description, isPrivate, user) {
     return newRoom(name, user, {
         description: description,
-        private: private
+        private: isPrivate
     });
 }
 
@@ -865,8 +866,37 @@ io.on('connection', (socket) => {
         const uniqueFileName = `${data.roomID}_${time}.png`;
         const imagePath = `${imageFolder}/${uniqueFileName}`;
 
-        // TODO: Demain aleks tu t'assures que la data arrive bien càd avec l'info sur le message caché et la méthode de stéga et tu save dans la db too...
+        // TODO: ici je dois faire appel à mes fonctions Rust pour chiffrer s'il y a un message caché
+        let methodEnum;
+        switch (data.stegaChoice) {
+            case 'lsb':
+                methodEnum = SteganographyMethod.LSB;
+                break;
+            case 'matrix_embedding':
+                methodEnum = SteganographyMethod.MatrixEmbedding;
+                break;
+            case 'fourier':
+                methodEnum = SteganographyMethod.FourierTransform;
+                break;
+            case '':
+                methodEnum = '';
+                break;
+            default:
+                alert('Veuillez sélectionner une méthode valide.');
+                return;
+        }
+        if (methodEnum !== '') {
+            try {
+                console.log('base64Image :>> ', data.image);
+                const encodedImage = hide_message_image(data.image, methodEnum, data.secretMessage);
+                console.log('Encoded image:', encodedImage);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
+        // TODO: Demain aleks tu t'assures que la data arrive bien càd avec l'info sur le message caché et la méthode de stéga et tu save dans la db too...
+        console.log('data new image message :>> ', data);
         // Save the image to the specified folder
         fs.writeFile(imagePath, data.image, 'base64', (err) => {
             if (err) {
@@ -875,6 +905,7 @@ io.on('connection', (socket) => {
                 console.log('Image saved:', imagePath);
             }
         });
+
         const dataToPersist = {
             imageName: uniqueFileName,
             image: data.image,
