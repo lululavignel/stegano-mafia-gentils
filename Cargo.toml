@@ -3,11 +3,12 @@ name = "steganomafia"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
 
 [dependencies]
-winapi = "0.3"
-wgpu = "0.13.1"
+wasm-bindgen = "0.2"
+base64 = "0.13"
 hex-literal = "0.4.1"
 image = "0.24.7"
 imageproc = "0.23.0"
@@ -18,10 +19,11 @@ clap = "3"
 sha3 = "0.10.8"
 md-5 = "0.10.6"
 getrandom = { version = "0.2", features = ["js"] }
-
 openssl = { version = "0.10.62", features = ["vendored"] }
 anstyle = "1.0.7"
+statrs = "0.15.0"
+web-sys = { version = "0.3.69" }
 
 [dependencies.show-image]
-version= "0.13.1"
+version = "0.13.1"
 features = ["image"]

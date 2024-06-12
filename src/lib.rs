@@ -63,6 +63,8 @@ pub fn hide_message_image(base64_image: &str, method: SteganographyMethod, messa
     let decoded_image = decode(base64_image).map_err(|e| JsValue::from_str(&e.to_string()))?;
     let mut image = image::load_from_memory(&decoded_image).map_err(|e| JsValue::from_str(&e.to_string()))?.to_rgb8();
 
+    println!("base64 image rust {}", base64_image);
+
     match method {
         SteganographyMethod::LSB => {
             let msg_bytes = message.as_bytes().to_vec();

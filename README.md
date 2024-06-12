@@ -7,7 +7,8 @@ A slightly more secure site
 Build rust
 ```
 rustup target add wasm32-unknown-unknown            //if needed
-cargo build --target wasm32-unknown-unknown --release
+cargo build --target wasm32-unknown-unknown --release   // if on windows
+cargo build                                             // on linux - CANCEL
 cargo install wasm-bindgen-cli                      // if needed
 wasm-bindgen target/wasm32-unknown-unknown/release/stegano_project.wasm --out-dir .
 cargo install wasm-pack                             // if needed
