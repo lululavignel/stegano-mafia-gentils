@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "child_process": "^1.0.2",
     "cryptico": "^1.0.2",
     "crypto-js": "^4.1.1",
     "express": "^4.18.2",
@@ -18,5 +19,14 @@
   "scripts": {
     "start": "node server.mjs"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lululavignel/stegano-mafia-gentils.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/lululavignel/stegano-mafia-gentils/issues"
+  },
+  "homepage": "https://github.com/lululavignel/stegano-mafia-gentils#readme"
 }

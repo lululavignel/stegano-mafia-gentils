@@ -1,8 +1,10 @@
 // TODO: on veut que lorsqu'on envoit une image une interface se présente à l'utilisateur lui proposant d'utiliser un algorithme d'encryptage, l'autre mafieux pourra faire tourner tous les algorithmes (côtés serveur pour essayer de décrypter un message d'une image) et le serveur lui renverrait le résultat de toutes ces decryptages.
-import init, { hide_message_image, SteganographyMethod  } from '../../pkg/stegano_project.js';
+// import init, { hide_message_image, SteganographyMethod  } from '../../pkg/stegano_project.js';
 
+const { execFile } = require('child_process');
 const fs = require('fs');
 const he = require('he');
+const os = require('os');
 const cryptico = require('cryptico');
 const CryptoJS = require('crypto-js');
 const bodyParser = require('body-parser');
@@ -327,6 +329,8 @@ function persistImage(data) {
     messagesData.push({
         imageName: data.imageName,
         image: data.image,
+        method: data.method,
+        message_length: data.message_length,
         from: data.from,
         roomID: data.roomID,
         time: data.time,
@@ -846,6 +850,134 @@ function isUserInRoom(room, username) {
     return false;
 }
 
+function executeSteganoTool(method, operation, inputImage, outputImage, message, additionalOptions = [], callback) {
+    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/debug/steganomafia');
+    
+    // Check if the binary exists
+    if (!fs.existsSync(binaryPath)) {
+        return callback(new Error(`Binary not found at path: ${binaryPath}`));
+    }
+
+    // Create a temporary file for the message
+    const tempMessagePath = path.join(os.tmpdir(), `message_${Date.now()}.txt`);
+    fs.writeFileSync(tempMessagePath, message, 'utf8');
+    
+    // Calculate the size of the message
+    const messageSize = Buffer.byteLength(message, 'utf8');
+    
+    // Structure the arguments correctly
+    const args = [
+        operation,
+        method,
+        '-i', inputImage,
+        outputImage,
+        '-t', message,
+        '-s', messageSize.toString(),
+        ...additionalOptions
+    ];
+    
+    execFile(binaryPath, args, (error, stdout, stderr) => {
+        // Clean up the temporary file
+        fs.unlinkSync(tempMessagePath);
+        
+        if (error) {
+            callback(error, null);
+            return;
+        }
+        callback(null, stdout);
+    });
+}
+
+function executeSteganoToolRetrieve(method, operation, inputImage, outputText, messageLength, additionalOptions = [], callback) {
+    if (messageLength === undefined) {
+        callback(null, '');
+        return;
+    }
+
+    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/debug/steganomafia');
+    const args = [operation, method, '-i', inputImage, outputText, '-s', messageLength.toString(), ...additionalOptions];
+    execFile(binaryPath, args, (error, stdout, stderr) => {
+        if (error) {
+            callback(error, null);
+            return;
+        }
+        callback(null, stdout);
+    });
+}
+
+function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
+    // Read the JSON file
+    fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading JSON file:', err);
+            callback(err);
+            return;
+        }
+
+        // Parse the JSON data
+        const jsonData = JSON.parse(data);
+
+        // Find the matching image data based on the provided searchData
+        const imageData = jsonData.find(item => item.time === searchData.date && item.from === searchData.user);
+
+        if (!imageData) {
+            const error = new Error('Image data not found');
+            console.error(error);
+            callback(error);
+            return;
+        }
+
+        const imageName = imageData.imageName;
+        const imageBase64 = imageData.image.split(',')[1];
+        const method = imageData.method;
+        const messageLength = imageData.message_length;
+        const time = imageData.time;
+
+        // Create paths for the image and the output text file
+        const imagePath = path.resolve(__dirname, 'images', imageName);
+        const outputDir = path.resolve(__dirname, 'output');
+        const outputTextPath = path.join(outputDir, `message_${time}.txt`);
+
+        // Ensure the output directory exists
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir);
+        }
+
+        // Ensure the output file exists
+        fs.writeFileSync(outputTextPath, '', { flag: 'w' });
+
+        // Save the image to the server
+        fs.writeFile(imagePath, Buffer.from(imageBase64, 'base64'), (err) => {
+            if (err) {
+                console.error('Error saving the image:', err);
+                callback(err);
+                return;
+            }
+
+            // Execute the steganography tool to retrieve the hidden message
+            executeSteganoToolRetrieve(method, '-r', imagePath, outputTextPath, messageLength, [], (err, result) => {
+                if (err) {
+                    console.error('Error retrieving message:', err);
+                    callback(err);
+                    return;
+                }
+
+                // Read the retrieved message from the output text file
+                fs.readFile(outputTextPath, 'utf8', (err, message) => {
+                    if (err) {
+                        console.error('Error reading retrieved message:', err);
+                        callback(err);
+                        return;
+                    }
+
+                    // Return the retrieved message
+                    callback(null, message);
+                });
+            });
+        });
+    });
+}
+
 ///////////////////////////
 // IO connection handler //
 ///////////////////////////
@@ -864,70 +996,122 @@ io.on('connection', (socket) => {
         const time = new Date().getTime();
         const room = Rooms.getRoom(data.roomID);
         const uniqueFileName = `${data.roomID}_${time}.png`;
-        const imagePath = `${imageFolder}/${uniqueFileName}`;
+        const imagePath = path.resolve(__dirname, 'images', uniqueFileName);
+        const outputImagePath = path.resolve(__dirname, 'images', `encoded_${uniqueFileName}`);
+        const messageFilePath = path.resolve('/tmp', `message_${time}.txt`);
 
-        // TODO: ici je dois faire appel à mes fonctions Rust pour chiffrer s'il y a un message caché
-        let methodEnum;
-        switch (data.stegaChoice) {
-            case 'lsb':
-                methodEnum = SteganographyMethod.LSB;
-                break;
-            case 'matrix_embedding':
-                methodEnum = SteganographyMethod.MatrixEmbedding;
-                break;
-            case 'fourier':
-                methodEnum = SteganographyMethod.FourierTransform;
-                break;
-            case '':
-                methodEnum = '';
-                break;
-            default:
-                alert('Veuillez sélectionner une méthode valide.');
-                return;
+        if (data.stegaChoice !== '') {
+            // Save the image to the server
+            fs.writeFile(imagePath, Buffer.from(data.image.split(',')[1], 'base64'), (err) => {
+                if (err) {
+                    console.error('Error saving the image:', err);
+                    return;
+                }
+        
+                // Save the message to a temporary file
+                fs.writeFile(messageFilePath, data.secretMessage, (err) => {
+                    if (err) {
+                        console.error('Error saving the message:', err);
+                        return;
+                    }
+        
+                    // Determine the steganography method and additional options
+                    let method;
+                    let additionalOptions = [];
+                    switch (data.stegaChoice) {
+                        case 'lsb':
+                            method = '-l';
+                            break;
+                        case 'pvd':
+                            method = '-d';
+                            break;
+                        case 'viterbi':
+                            method = '-v';
+                            break;
+                        case 'dct':
+                            method = '-f';
+                            break;
+                        default:
+                            console.error('Unknown steganography method:', data.stegaChoice);
+                            return;
+                    }
+        
+                    if (method) {
+                        // Execute the steganography tool
+                        executeSteganoTool(method, '-w', imagePath, outputImagePath, messageFilePath, additionalOptions, (err, result) => {
+                            if (err) {
+                                console.error('Error hiding message:', err);
+                                return;
+                            }
+                            console.log('Message hidden successfully:', result);
+        
+                            // Read the encoded image
+                            fs.readFile(outputImagePath, 'base64', (err, base64Image) => {
+                                if (err) {
+                                    console.error('Error reading encoded image:', err);
+                                    return;
+                                }
+                                const dataToSend = {
+                                    username: data.sender.username,
+                                    image: `data:image/png;base64,${base64Image}`,
+                                    roomID: data.roomID,
+                                    time: time
+                                };
+                                room.addImage({
+                                    username: data.sender.username,
+                                    imageName: `encoded_${uniqueFileName}`,
+                                    image: `data:image/png;base64,${base64Image}`,
+                                    time: time
+                                });
+                                sendToRoom(room, 'new image message', dataToSend);
+                                persistImage({
+                                    imageName: `encoded_${uniqueFileName}`,
+                                    image: `data:image/png;base64,${base64Image}`,
+                                    method: method,
+                                    message_length: Buffer.byteLength(data.secretMessage, 'utf8'),
+                                    from: data.sender.username,
+                                    roomID: data.roomID,
+                                    time: time,
+                                    direct: room.direct
+                                });
+                            });
+                        });
+                    }
+                });
+            });
+        } else {
+            fs.writeFile(imagePath, data.image, 'base64', (err) => {
+                if (err) {
+                    console.err('Error saving image:', err);
+                } else {
+                    console.log('Image saved:', imagePath);
+                }
+            });
+
+            const dataToPersist = {
+                imageName: uniqueFileName,
+                image: data.image,
+                from: data.sender.username,
+                roomID: data.roomID,
+                time: time,
+                direct: room.direct
+            };
+            const dataToSend = {
+                username: data.sender.username,
+                image: data.image,
+                roomID: data.roomID,
+                time: time
+            };
+            room.addImage({
+                username: dataToPersist.from,
+                imageName: dataToPersist.imageName,
+                image: dataToPersist.image,
+                time: dataToPersist.time
+            });
+            sendToRoom(room, 'new image message', dataToSend);
+            persistImage(dataToPersist);
         }
-        if (methodEnum !== '') {
-            try {
-                console.log('base64Image :>> ', data.image);
-                const encodedImage = hide_message_image(data.image, methodEnum, data.secretMessage);
-                console.log('Encoded image:', encodedImage);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        // TODO: Demain aleks tu t'assures que la data arrive bien càd avec l'info sur le message caché et la méthode de stéga et tu save dans la db too...
-        console.log('data new image message :>> ', data);
-        // Save the image to the specified folder
-        fs.writeFile(imagePath, data.image, 'base64', (err) => {
-            if (err) {
-                console.error('Error saving image:', err);
-            } else {
-                console.log('Image saved:', imagePath);
-            }
-        });
-
-        const dataToPersist = {
-            imageName: uniqueFileName,
-            image: data.image,
-            from: data.sender.username,
-            roomID: data.roomID,
-            time: time,
-            direct: room.direct
-        };
-        const dataToSend = {
-            username: data.sender.username,
-            image: data.image,  // imageData is the base64 data URI of the image
-            roomID: data.roomID,
-            time: time
-        };
-        room.addImage({
-            username: dataToPersist.from,
-            imageName: dataToPersist.imageName,
-            image: dataToPersist.image,
-            time: dataToPersist.time
-        });
-        sendToRoom(room, 'new image message', dataToSend);
-        persistImage(dataToPersist);
+    
     });
 
     // Handles the event when a new public message is received
@@ -1014,14 +1198,25 @@ io.on('connection', (socket) => {
     ////////////////////////////////////////////////////////////////
 
     socket.on('run_probabilistic_algorithm', (data) => {
-        console.log('Running probabilistic algorithm for:', data);
-    
         
     });
 
     socket.on('reveal_hidden_message', (data) => {
-        console.log('Revealing hidden message for:', data);
-    
+        const jsonFilePath = 'persist/images-data.json';
+        retrieveHiddenMessage(jsonFilePath, data, (err, message) => {
+            if (err) {
+                console.error('Failed to retrieve hidden message:', err);
+            } else {
+                console.log('Retrieved hidden message:', message);
+                
+                const responseData = {
+                    roomID: data.roomID,
+                    secretMessage: message
+                }
+
+                socket.emit('hidden_message_revealed', responseData );
+            }
+        });
     });
 
     // Handles the event when registering user data on the server in chunks
@@ -1083,18 +1278,13 @@ io.on('connection', (socket) => {
             // Parse the JSON data
             const completeData = JSON.parse(userDataRegistration);
 
-            console.log('completeData :>> ', completeData);
-
             const userDataDecrypted = decryptConnectionData(completeData, serverKeyPair);
             userDataDecrypted.publicKey = completeData.userPublicKey;
-
-            console.log('userDataDecrypted :>> ', userDataDecrypted);
 
             const user = encryptConnectionData(userDataDecrypted, getPublicKeyByUsername(userDataDecrypted.username));
             if (Users.getUser(userDataDecrypted.username) && checkUserIdentity(userDataDecrypted)) {
                 user.serverPublicKey = serverPublicKey;
                 user.userType = Users.getUser(userDataDecrypted.username).getUserType();
-                console.log('user :>> ', user);
                 socket.emit('user_identified_successfully', user);
             } else {
                 socket.emit('wrong_data', user);

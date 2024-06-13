@@ -52,24 +52,38 @@
                 <p>Drag & Drop an Image Here</p>
             </div>
 
-            <!-- Form Popup -->
             <div id="form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
                 <form id="image-form">
                     <label for="message-secret">Message caché à intégrer:</label>
                     <input type="text" id="message-secret" name="message-secret">
-                    
+            
                     <label for="dropdown-choice">Choisissez un élément:</label>
                     <select id="dropdown-choice" name="dropdown-choice">
-                        <option value="" disabled selected>Choisissez un algorithme</option>
-                        <option value="">Aucun</option>
+                        <option value="" selected>Aucun</option>
                         <option value="lsb">LSB</option>
-                        <option value="matrix_embedding">Matrix Embedding</option>
-                        <option value="fourier">Transformée de Fourier</option>
+                        <option value="pvd">PVD</option>
+                        <option value="viterbi">Viterbi</option>
+                        <option value="dct">DCT</option>
                     </select>
-                    
+            
+                    <label for="image-percentage">Pourcentage de l'image à utiliser:</label>
+                    <input type="text" id="image-percentage" name="image-percentage" placeholder="0.5">
+            
+                    <label for="key-file">Fichier de clé AES:</label>
+                    <input type="text" id="key-file" name="key-file" placeholder="keyfile.txt">
+            
+                    <label for="iterator-algorithm">Algorithme d'itération:</label>
+                    <select id="iterator-algorithm" name="iterator-algorithm">
+                        <option value="" selected>Aucun</option>
+                        <option value="md5">MD5</option>
+                        <option value="sha256">SHA-256</option>
+                        <option value="sha512">SHA-512</option>
+                    </select>
+            
                     <button type="submit">Submit</button>
                 </form>
             </div>
+            
 
             <!-- Overlay -->
             <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>

@@ -282,7 +282,8 @@ $(function () {
         const data = {
             user: username,
             date: time,
-            source: imageSrc
+            source: imageSrc,
+            roomID: currentRoom.id
         };
     
         socket.emit('reveal_hidden_message', data);
@@ -443,17 +444,15 @@ $(function () {
                 // Assume the first file is the image
                 droppedImageFile = files[0];
 
-                if (userType === 'mafia') {
-                    // Show the form popup and overlay
+                if (userType === 'steganaliste') {
+                    handleImageFile(droppedImageFile)
+                } else {    // he is from mafia
                     formPopup.style.display = 'block';
                     overlay.style.display = 'block';
         
-                    // Use a timeout to ensure the element is ready to be focused
                     setTimeout(() => {
                         descriptionInput.focus();
                     }, 0);
-                } else {
-                    handleImageFile(droppedImageFile)
                 }
             }
         });
@@ -465,11 +464,13 @@ $(function () {
         e.preventDefault();
     
         // Here you can collect form data if needed
-        const description = document.getElementById('message-secret').value;
+        const secretMessage = document.getElementById('message-secret').value;
         const dropdownChoice = document.getElementById('dropdown-choice').value;
+
+        console.log("handleImageFile imageFile secret msg dropchoice ", secretMessage, " dropdownChoice", dropdownChoice);
     
         // Process the image file after form submission
-        handleImageFile(droppedImageFile, description, dropdownChoice);
+        handleImageFile(droppedImageFile, secretMessage, dropdownChoice);
     
         // Hide the form popup and overlay
         formPopup.style.display = 'none';
@@ -486,36 +487,15 @@ $(function () {
         console.log('Dropdown choice:', dropdownChoice);
         if (imageFile.type.startsWith('image/')) {
             const reader = new FileReader();
-    
-            reader.onload = (event) => {
-                const imageData = event.target.result;
-                const data = {
-                    image: imageData,
-                    secretMessage: secretMessage,
-                    dropdownChoice: dropdownChoice
-                }
-                sendImage(data);
-            };
-    
-            reader.readAsDataURL(imageFile);
-        } else {
-            alert('Please select a valid image file.');
-        }
-    }
 
-    function handleImageFile(imageFile) {
-        // Check if it's an image file (you can add more validation)
-        console.log('Handling image file:', imageFile);
-        if (imageFile.type.startsWith('image/')) {
-            const reader = new FileReader();
-    
             reader.onload = (event) => {
                 const imageData = event.target.result;
                 const data = {
                     image: imageData,
-                    secretMessage: "",
-                    dropdownChoice: ""
+                    secretMessage: secretMessage ? secretMessage : "",
+                    dropdownChoice: dropdownChoice ? dropdownChoice : ""
                 }
+                console.log("handleImageFile imageFile secret msg dropchoice ", data);
                 sendImage(data);
             };
     
@@ -668,6 +648,38 @@ $(function () {
         if (roomId == currentRoom.id)
             addChatImage(username, imageSrc, time);
 
+    });
+
+    socket.on('hidden_message_revealed', (data) => {
+        if (userType === 'mafia') {
+            const roomId = data.roomID;
+            const secretMessage = data.secretMessage;
+
+            const room = rooms.find(room => {
+                try {
+                    return room.id === roomId;
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            if (room) {
+                const msg = {
+                    username: 'Server',
+                    message: secretMessage,
+                    time: new Date().getTime(),
+                    room: roomId
+                };
+
+                room.history.push(msg);
+
+                if (roomId === currentRoom.id) {
+                    addChatMessage(msg);
+                } else {
+                    messageNotify(msg);
+                }
+            }
+        }
     });
 
     socket.on('update_user', data => {
