@@ -334,7 +334,10 @@ function persistImage(data) {
         from: data.from,
         roomID: data.roomID,
         time: data.time,
-        direct: data.direct
+        direct: data.direct,
+        imagePercentage: data.imagePercentage,
+        keyFile: data.keyFile,
+        iteratorAlgorithm: data.iteratorAlgorithm
     });
 
     try {
@@ -344,6 +347,7 @@ function persistImage(data) {
         console.error('Error persisting image data:', err);
     }
 }
+
 
 /**
  * Persists a public message to the storage.
@@ -872,7 +876,7 @@ function executeSteganoTool(method, operation, inputImage, outputImage, message,
         '-i', inputImage,
         outputImage,
         '-t', message,
-        '-s', messageSize.toString(),
+//        '-s', messageSize.toString(),
         ...additionalOptions
     ];
     
@@ -999,7 +1003,17 @@ io.on('connection', (socket) => {
         const imagePath = path.resolve(__dirname, 'images', uniqueFileName);
         const outputImagePath = path.resolve(__dirname, 'images', `encoded_${uniqueFileName}`);
         const messageFilePath = path.resolve('/tmp', `message_${time}.txt`);
-
+        const keyFilePath = path.resolve('/tmp', `key_${time}.txt`);
+    
+        const generateAESKey = () => {
+            const key = CryptoJS.lib.WordArray.random(128 / 8).toString();
+            return key;
+        };
+    
+        const keyToHex = (key) => {
+            return key.split('').map(c => c.charCodeAt(0).toString(16)).join('');
+        };
+    
         if (data.stegaChoice !== '') {
             // Save the image to the server
             fs.writeFile(imagePath, Buffer.from(data.image.split(',')[1], 'base64'), (err) => {
@@ -1007,20 +1021,36 @@ io.on('connection', (socket) => {
                     console.error('Error saving the image:', err);
                     return;
                 }
-        
+                
+                console.log("fs.writeFile ", data.secretMessage);
+
                 // Save the message to a temporary file
                 fs.writeFile(messageFilePath, data.secretMessage, (err) => {
                     if (err) {
                         console.error('Error saving the message:', err);
                         return;
                     }
-        
+    
+                    // Save the key file if provided
+                    if (data.keyFile) {
+                        const key = generateAESKey();
+                        const hexKey = keyToHex(key);
+                        fs.writeFileSync(keyFilePath, hexKey, 'utf8');
+                    }
+    
                     // Determine the steganography method and additional options
                     let method;
                     let additionalOptions = [];
                     switch (data.stegaChoice) {
                         case 'lsb':
                             method = '-l';
+                            if (data.imagePercentage) {
+                                additionalOptions.push('-p', data.imagePercentage);
+                            } else {
+                                additionalOptions.push('-s', Buffer.byteLength(data.secretMessage, 'utf8').toString());
+                            }
+                            if (data.keyFile) additionalOptions.push('-c', keyFilePath);
+                            if (data.iteratorAlgorithm) additionalOptions.push('-g', data.iteratorAlgorithm);
                             break;
                         case 'pvd':
                             method = '-d';
@@ -1035,16 +1065,15 @@ io.on('connection', (socket) => {
                             console.error('Unknown steganography method:', data.stegaChoice);
                             return;
                     }
-        
+    
                     if (method) {
-                        // Execute the steganography tool
                         executeSteganoTool(method, '-w', imagePath, outputImagePath, messageFilePath, additionalOptions, (err, result) => {
                             if (err) {
                                 console.error('Error hiding message:', err);
                                 return;
                             }
                             console.log('Message hidden successfully:', result);
-        
+    
                             // Read the encoded image
                             fs.readFile(outputImagePath, 'base64', (err, base64Image) => {
                                 if (err) {
@@ -1072,7 +1101,10 @@ io.on('connection', (socket) => {
                                     from: data.sender.username,
                                     roomID: data.roomID,
                                     time: time,
-                                    direct: room.direct
+                                    direct: room.direct,
+                                    imagePercentage: data.imagePercentage,
+                                    keyFile: keyFilePath,
+                                    iteratorAlgorithm: data.iteratorAlgorithm
                                 });
                             });
                         });
@@ -1082,12 +1114,12 @@ io.on('connection', (socket) => {
         } else {
             fs.writeFile(imagePath, data.image, 'base64', (err) => {
                 if (err) {
-                    console.err('Error saving image:', err);
+                    console.error('Error saving image:', err);
                 } else {
                     console.log('Image saved:', imagePath);
                 }
             });
-
+    
             const dataToPersist = {
                 imageName: uniqueFileName,
                 image: data.image,
@@ -1111,8 +1143,9 @@ io.on('connection', (socket) => {
             sendToRoom(room, 'new image message', dataToSend);
             persistImage(dataToPersist);
         }
-    
     });
+        
+        
 
     // Handles the event when a new public message is received
     socket.on('new public message', data => {

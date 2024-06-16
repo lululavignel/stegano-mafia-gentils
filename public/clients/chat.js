@@ -463,39 +463,34 @@ $(function () {
     document.getElementById('image-form').addEventListener('submit', (e) => {
         e.preventDefault();
     
-        // Here you can collect form data if needed
         const secretMessage = document.getElementById('message-secret').value;
         const dropdownChoice = document.getElementById('dropdown-choice').value;
-
-        console.log("handleImageFile imageFile secret msg dropchoice ", secretMessage, " dropdownChoice", dropdownChoice);
+        const imagePercentage = document.getElementById('image-percentage').value;
+        const keyFile = document.getElementById('key-file').value;
+        const iteratorAlgorithm = document.getElementById('iterator-algorithm').value;
     
-        // Process the image file after form submission
-        handleImageFile(droppedImageFile, secretMessage, dropdownChoice);
+        handleImageFile(droppedImageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm);
     
-        // Hide the form popup and overlay
         formPopup.style.display = 'none';
         overlay.style.display = 'none';
     
-        // Reset the form
         document.getElementById('image-form').reset();
     });
-
-    function handleImageFile(imageFile, secretMessage, dropdownChoice) {
-        // Check if it's an image file (you can add more validation)
-        console.log('Handling image file:', imageFile);
-        console.log('secretMessage:', secretMessage);
-        console.log('Dropdown choice:', dropdownChoice);
+    
+    function handleImageFile(imageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm) {
         if (imageFile.type.startsWith('image/')) {
             const reader = new FileReader();
-
+    
             reader.onload = (event) => {
                 const imageData = event.target.result;
                 const data = {
                     image: imageData,
                     secretMessage: secretMessage ? secretMessage : "",
-                    dropdownChoice: dropdownChoice ? dropdownChoice : ""
-                }
-                console.log("handleImageFile imageFile secret msg dropchoice ", data);
+                    dropdownChoice: dropdownChoice ? dropdownChoice : "",
+                    imagePercentage: imagePercentage ? imagePercentage : "",
+                    keyFile: keyFile ? keyFile : "",
+                    iteratorAlgorithm: iteratorAlgorithm ? iteratorAlgorithm : ""
+                };
                 sendImage(data);
             };
     
@@ -504,24 +499,27 @@ $(function () {
             alert('Please select a valid image file.');
         }
     }
-
-    // Function to send an image
+    
     function sendImage(data) {
         if (connected && currentRoom !== false) {
             const user = encryptConnectionDataWithoutHashing(window.user, serverPublicKey);
             const msgSymmetricKey = generateSymmetricKey().toString();
-
-            // Send the image as a message
+    
             const msg = {
                 sender: user,
-                image: data.image,  // imageData is the base64 data URI of the image
+                image: data.image,
                 secretMessage: data.secretMessage,
                 stegaChoice: data.dropdownChoice,
+                imagePercentage: data.imagePercentage,
+                keyFile: data.keyFile,
+                iteratorAlgorithm: data.iteratorAlgorithm,
                 roomID: currentRoom.id,
             };
             socket.emit('new image message', msg);
         }
     }
+    
+    
 
 
     /////////////////////
