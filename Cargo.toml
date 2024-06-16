@@ -23,6 +23,7 @@ openssl = { version = "0.10.62", features = ["vendored"] }
 anstyle = "1.0.7"
 statrs = "0.15.0"
 web-sys = { version = "0.3.69" }
+polynomen = "1.1.0"
 
 [dependencies.show-image]
 version = "0.13.1"

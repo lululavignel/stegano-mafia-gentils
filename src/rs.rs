@@ -1,4 +1,5 @@
-use image::{GenericImageView, RgbImage};
+use image::RgbImage;
+use polynomen::poly;
 
 use crate::shannon_entropy::randomize_lsb;
 pub enum Group{
@@ -74,8 +75,7 @@ pub fn group_stats(img:&RgbImage,pos_mask:&[&[i16]])-> (f64,f64,f64,i32){
 
 }
 
-pub fn compute_rs(img:&RgbImage,mask:&[&[i16]],verbose:bool) ->Option::<f64>{
-
+pub fn get_polynomial(img:&RgbImage,mask:&[&[i16]],verbose:bool) -> (f64,f64,f64){
     let positive_mask= mask;
     let mut negative_mask= Vec::<Vec::<i16>>::new();
     let mut line_v;
@@ -93,10 +93,9 @@ pub fn compute_rs(img:&RgbImage,mask:&[&[i16]],verbose:bool) ->Option::<f64>{
     let stats_p2 = group_stats(img, mask);
     let neg_stats_p2 = group_stats(img, neg.as_slice());
 
-    let mut img_1_minus_p2= img.clone();
-    randomize_lsb(&mut img_1_minus_p2,1.0,0x01 );
-    let stats_1_minus_p2 = group_stats(img, mask);
-    let neg_stats_1_minus_p2 = group_stats(img, neg.as_slice());
+    let img_1_minus_p2=randomize_lsb(img,2.0,0x01 );
+    let stats_1_minus_p2 = group_stats(&img_1_minus_p2, mask);
+    let neg_stats_1_minus_p2 = group_stats(&img_1_minus_p2, neg.as_slice());
 
     let r_m_p_2=  stats_p2.0;
     let s_m_p_2=  stats_p2.1;
@@ -120,7 +119,11 @@ pub fn compute_rs(img:&RgbImage,mask:&[&[i16]],verbose:bool) ->Option::<f64>{
     let a = 2.*(d_1+d_0);
     let b= d_neg_0 - d_neg_1 - d_1 - 3.*d_0;
     let c = d_0- d_neg_0; 
+    return  (a,b,c);
+}
 
+pub fn get_p_from_pol(a:f64,b:f64,c:f64,verbose:bool)-> Option<f64>{
+    
     let delta = b*b  - 4.*a*c ;
     if verbose{
         println!("Polynome : {}X² + {}X + {}",a,b,c);
@@ -149,23 +152,69 @@ pub fn compute_rs(img:&RgbImage,mask:&[&[i16]],verbose:bool) ->Option::<f64>{
     if z1<0.{
         return Some(z2);
     }
+    if z2<0. && z2>-0.01{
+        return Some(0.);
+    }
     if z2>0. && z2<z1{
         return Some(z2);
     }
-    return Some(z1);
-
-
-    
+    return Some(z1);  
 }
 
+pub fn compute_rs(img:&RgbImage,mask:&[&[i16]],verbose:bool) ->Option<f64>{
+    let (a,b,c)= get_polynomial(img, mask, verbose);
+    let opt_result = get_p_from_pol(a, b, c, verbose);
+    return opt_result;
+}
 
+pub fn compute_dyn_rs(img:&RgbImage,masks:&Vec::<&[&[i16]]>,verbose:bool)-> Option<f64>{
+    let mut q_min =99999.;
+    let mut mask_min = masks[0];
+    let mut best_pol = (0.,0.,0.);
+    for mask in masks{
+        let (a,b,c)= get_polynomial(img, mask, verbose);
+        //                         X⁰        X¹                 X²          X³
+        let pol = poly![2.*b*c,  4.*a*c+2.*b*b  ,  6.*a*b  ,  4.*a*a];
 
+        let roots = pol.real_roots().unwrap();
+        if verbose{
+            println!("For mask : {:?}, roots are : {:?}",mask,roots);
+        }
+        for root in roots{
+            let q= a*root*root +b*root+c;
+            println!("for root {root} : {}", q);
+            let abs_q = q.abs();
+            if q_min>abs_q{
+                q_min=abs_q;
+                mask_min=mask;
+                best_pol=(a,b,c);
+            }
+        }
 
+    }
+    return get_p_from_pol(best_pol.0, best_pol.1, best_pol.2, verbose);
 
+}
+
+pub fn default_compute_rs(img:&RgbImage) -> Option::<f64>{
+    let mask= [[0 as i16 ,1,1,0].as_slice()];
+    //let mask= [[0 as i16 ,0,0].as_slice(),[0 as i16 ,1,0].as_slice(),[0 as i16 ,0,0].as_slice()];
+    //let mask= [[0 as i16 ,1,0].as_slice()];
+    return compute_rs(&img,mask.as_slice(),false);
+}
+pub fn defautl_dyn_rs(img: &RgbImage) -> Option::<f64>{
+    let m1 =[[0 as i16 ,1,1,0].as_slice()];
+    let m2 =[[0 as i16 ,1,0,1].as_slice()];
+    let m3 =[[0 as i16 ,1,0].as_slice()];
+    let m4 =[[0 as i16 ,0,0].as_slice() , [0 as i16 ,1,0].as_slice(),[0 as i16 ,0,0].as_slice()];
+    let masks = vec![m1.as_slice(),m2.as_slice(),m3.as_slice(),m4.as_slice()];
+    return compute_dyn_rs(img,&masks,false);
+
+}
 #[cfg(test)]
 mod test_entropy{
 
-   
+
     use image::io::Reader as ImageReader;
     use super::*;
 
@@ -174,16 +223,41 @@ mod test_entropy{
     fn test_compute_rs(){
         let values = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99];
         for value in values{
-            let img_name=format!("/home/admin/Images/steg/s256-c-p-{}/IMG_20231005_133114.png",value);
+            let img_name=format!("/home/admin/Images/steg/s256-c-p-{}/IMG_20230425_115924.png",value);
+            //let img_name=format!("/home/admin/Images/steg/qarr-p-{}/the-backrooms-image.png",value);
+            
+            //let img_name=format!("/home/admin/Images/steg/base_img/image16.png");
             let image = ImageReader::open(img_name).unwrap().decode().unwrap().to_rgb8();
 
-            let mask= [[0 as i16 ,1,1,0].as_slice()];
-            let res = compute_rs(&image,mask.as_slice(),false);
+            let mask= [[0 as i16 ,1,0].as_slice()];
+            //let mask= [[0 as i16 ,0,0].as_slice(),[0 as i16 ,1,0].as_slice(),[0 as i16 ,0,0].as_slice()];
+            let res = compute_rs(&image,mask.as_slice(),true);
 
             println!("========================\nResult for {}% steganographied : {}",value,res.unwrap());
         }
         
-        
-
+    
     } 
+    #[test]
+    fn test_dyn_compute_rs(){
+        let values = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99];
+        let m1 =[[0 as i16 ,1,1,0].as_slice()];
+        let m2 =[[0 as i16 ,1,0,1].as_slice()];
+        let m3 =[[0 as i16 ,1,0].as_slice()];
+        let m4 =[[0 as i16 ,0,0].as_slice() , [0 as i16 ,1,0].as_slice(),[0 as i16 ,0,0].as_slice()];
+        let masks = vec![m1.as_slice(),m2.as_slice(),m3.as_slice(),m4.as_slice()];
+            //let mask= [[0 as i16 ,0,0].as_slice(),[0 as i16 ,1,0].as_slice(),[0 as i16 ,0,0].as_slice()];
+        for value in values{
+            let img_name=format!("/home/admin/Images/steg/s256-c-p-{}/the-backrooms-image.png",value);
+            //let img_name=format!("/home/admin/Images/steg/base_img/image16.png");
+            let image = ImageReader::open(img_name).unwrap().decode().unwrap().to_rgb8();
+
+            
+            let res = compute_dyn_rs(&image,&masks,true);
+
+            println!("========================\nResult for {}% steganographied : {}",value,res.unwrap());
+        }
+    }
 }
+/*/home/admin/Images/steg/base_img/image16.png;2.0009061913359196*/
+
