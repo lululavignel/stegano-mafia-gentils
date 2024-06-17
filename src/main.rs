@@ -80,6 +80,7 @@ const IM_TRANS: &str="image operation";
 const TRANS_LSB: &str="lsb";
 const TRANS_DELTA: &str="img-delta";
 const RUN_ALL_TESTS_FOLDER: &str="test folder";
+const OUTPUT_FILE: &str = "output-file";
 pub(crate) fn main() {
     let mut  app = App::new("Stegano-visuals-tools")
         .version("0.0.3")
@@ -109,7 +110,12 @@ pub(crate) fn main() {
                 .takes_value(true)
                 .help("Test an file. Chose an algo. if shanon give mask. The percentage given is used in logs (./output).")
                 .min_values(2)
-                .max_values(3));
+                .max_values(3))
+        .arg(Arg::with_name(OUTPUT_FILE)
+            .short('o')
+            .long("output")
+            .takes_value(true)
+            .help("Specify the output file for results"));
     
     let matches = app.clone().get_matches();
     let img_in;
@@ -140,7 +146,8 @@ pub(crate) fn main() {
             "randshanon" => rand_sha_fx(),
             _=> None,
         };
-        let mut file =File::options().create(true).truncate(true).write(true).open("./output").unwrap();
+        let output_file = matches.value_of(OUTPUT_FILE).unwrap_or("./output");
+        let mut file =File::options().create(true).truncate(true).write(true).open(output_file).unwrap();
         if result.is_some(){
             let str = format!("{}",result.unwrap());
             file.write(str.as_bytes());

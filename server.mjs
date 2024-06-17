@@ -893,6 +893,26 @@ function executeSteganoTool(method, operation, inputImage, outputImage, message,
     });
 }
 
+function executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, callback) {
+    let binaryPath = "";
+    let args = "";
+    if (choosenAlgorithm === "lsb" || choosenAlgorithm === "img-delta") {
+        binaryPath = path.resolve(__dirname, 'target/release/main_annalyser');
+        args = ['-t', choosenAlgorithm, '-i', imagePath, outputPath + '.png'];
+    } else {
+        binaryPath = path.resolve(__dirname, 'target/release/steganomafia');
+        args = ['-d', imagePath, choosenAlgorithm, '-o', outputPath];
+    }
+    execFile(binaryPath, args, (error, stdout, stderr) => {
+        if (error) {
+            callback(error, null);
+            return;
+        }
+        callback(null, stdout);
+    });
+}
+
+
 function executeSteganoToolRetrieve(method, operation, inputImage, outputText, messageLength, additionalOptions = [], callback) {
     if (messageLength === undefined) {
         callback(null, '');
@@ -909,6 +929,34 @@ function executeSteganoToolRetrieve(method, operation, inputImage, outputText, m
         callback(null, stdout);
     });
 }
+
+function runProbabilisticAlgorithm(jsonFilePath, searchData, callback) {
+    fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading JSON file:', err);
+            callback(err);
+            return;
+        }
+
+        const jsonData = JSON.parse(data);
+        const imageData = jsonData.find(item => item.time === searchData.date && item.from === searchData.user);
+
+        if (!imageData) {
+            const error = new Error('Image data not found');
+            console.error(error);
+            callback(error);
+            return;
+        }
+
+        const imageName = imageData.imageName;
+        const imagePath = path.resolve(__dirname, 'images', imageName);
+        const outputPath = path.resolve(__dirname, 'output_algo');
+        const choosenAlgorithm = searchData.algorithm;
+
+        executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, callback);
+    });
+}
+
 
 /**
  * Retrieves a hidden message from an image stored in a JSON file.
@@ -1169,7 +1217,7 @@ io.on('connection', (socket) => {
                 });
             });
         } else {
-            fs.writeFile(imagePath, data.image, 'base64', (err) => {
+            fs.writeFile(imagePath, Buffer.from(data.image.split(',')[1], 'base64'), 'base64', (err) => {
                 if (err) {
                     console.error('Error saving image:', err);
                 } else {
@@ -1289,11 +1337,25 @@ io.on('connection', (socket) => {
 
     socket.on('run_probabilistic_algorithm', (data) => {
         console.log('run_probabilistic_algorithm data', data);
+        const jsonFilePath = 'persist/images-data.json';
+        runProbabilisticAlgorithm(jsonFilePath, data, (err, message) => {
+            if (err) {
+                console.error('Failed to retrieve hidden message:', err);
+            } else {
+                console.log('Retrieved hidden message:', message);
+                
+                const responseData = {
+                    roomID: data.roomID,
+                    secretMessage: message
+                }
+
+                socket.emit('hidden_message_revealed', responseData );
+            }
+        });
     });
 
     socket.on('reveal_hidden_message', (data) => {
         const jsonFilePath = 'persist/images-data.json';
-        console.log("reveal_hidden_message", data);
         retrieveHiddenMessage(jsonFilePath, data, (err, message) => {
             if (err) {
                 console.error('Failed to retrieve hidden message:', err);
