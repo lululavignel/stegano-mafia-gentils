@@ -280,11 +280,8 @@ $(function () {
         const iteratorAlgorithm = document.getElementById('iterator-algorithm');
         if (selectedValue === "viterbi") {
             matrixAlphaChoice.style.display = 'block';
-            iteratorAlgorithm.style.display = 'none';
-            iteratorAlgorithm.value = "";
         } else {
             matrixAlphaChoice.style.display = 'none';
-            iteratorAlgorithm.style.display = 'block';
         }
     });
 
@@ -362,8 +359,6 @@ $(function () {
     
         $messages[0].scrollTop = $messages[0].scrollHeight;
     }
-    
-    
 
     function addChatMessage(msg) {
         let time = new Date(msg.time).toLocaleTimeString('en-US', {
@@ -427,6 +422,7 @@ $(function () {
     const dropZone = document.getElementById('drop-zone');
     const imageFormPopup = document.getElementById('image-form-popup');
     const passphraseFormPopup = document.getElementById('passphrase-form-popup');
+    const algorithmFormPopup = document.getElementById('algorithm-form-popup');
     const overlay = document.getElementById('overlay');
     const secretMessageInput = document.getElementById('message-secret');
     const passphraseAesInput = document.getElementById('aes-key-reveal');
@@ -496,6 +492,32 @@ $(function () {
         });
 
         fileInput.click();
+    });
+
+    $(document).on('click', '.run-prob-algorithm', function() {
+        const username = $(this).data('username');
+        const time = $(this).data('time');
+        const imageSrc = $(this).data('image-src');
+        const roomID = currentRoom.id;
+        const data = { user: username, date: time, source: imageSrc, roomID: roomID };
+
+        $('#algorithm-form-popup').data('probData', data);
+        algorithmFormPopup.style.display = 'block';
+        overlay.style.display = 'block';
+        $('#prob-algorithm-choice').focus();
+    });
+
+    $('#algorithm-form').on('submit', function(e) {
+        e.preventDefault();
+        const selectedAlgorithm = $('#prob-algorithm-choice').val();
+        const data = $('#algorithm-form-popup').data('probData');
+        data.algorithm = selectedAlgorithm;
+
+        socket.emit('run_probabilistic_algorithm', data);
+
+        algorithmFormPopup.style.display = 'none';
+        overlay.style.display = 'none';
+        $('#algorithm-form')[0].reset();
     });
 
     document.getElementById('image-form').addEventListener('submit', (e) => {

@@ -105,6 +105,21 @@
                     <button type="submit">Submit</button>
                 </form>
             </div>
+
+            <div id="algorithm-form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+                <form id="algorithm-form">
+                    <label for="prob-algorithm-choice">Choisissez un algorithme probabiliste:</label>
+                    <select id="prob-algorithm-choice" name="prob-algorithm-choice">
+                        <option value="image-delta">Delta de l'Image</option>
+                        <option value="lsb-displayed">LSB affichée</option>
+                        <option value="rs">RS</option>
+                        <option value="dynrs">DynRS</option>
+                        <option value="shanon">Shanon</option>
+                        <option value="randshanon">RandShanon</option>
+                    </select>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
             
             <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
 
@@ -168,7 +183,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="list-group" id="channelJoins">
-
                     </div>
                 </div>
             </div>
@@ -189,7 +203,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="list-group" id="usersToAdd">
-
                     </div>
                 </div>
             </div>

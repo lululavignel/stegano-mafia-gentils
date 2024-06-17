@@ -977,7 +977,7 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
                 additionalOptions.push('--alpha', imageData.alphaMatrix);
                 additionalOptions.push('-s', imageData.message_length);
                 if (searchData.passphrase !== "") additionalOptions.push('-c', keyFilePath);
-                // if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
+                if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
                 break;
             case '-f':
                 break;
@@ -988,7 +988,7 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
 
         // Create paths for the image and the output text file
         const imagePath = path.resolve(__dirname, 'images', imageName);
-        const outputDir = path.resolve(__dirname, 'output');
+        const outputDir = path.resolve(__dirname, 'output_msg');
         const outputTextPath = path.join(outputDir, `message_${time}.txt`);
 
         // Ensure the output directory exists
@@ -1058,8 +1058,6 @@ io.on('connection', (socket) => {
         const messageFilePath = path.resolve('/tmp', `message_${time}.txt`);
         const keyFilePath = path.resolve('/tmp', `key_${time}.txt`);
 
-        console.log('new image message data', data);
-    
         if (data.stegaChoice !== '') {
             fs.writeFile(imagePath, Buffer.from(data.image.split(',')[1], 'base64'), (err) => {
                 if (err) {
@@ -1290,7 +1288,7 @@ io.on('connection', (socket) => {
     ////////////////////////////////////////////////////////////////
 
     socket.on('run_probabilistic_algorithm', (data) => {
-        
+        console.log('run_probabilistic_algorithm data', data);
     });
 
     socket.on('reveal_hidden_message', (data) => {
