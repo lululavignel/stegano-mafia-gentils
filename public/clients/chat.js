@@ -509,15 +509,33 @@ $(function () {
 
     $('#algorithm-form').on('submit', function(e) {
         e.preventDefault();
+        var randshanonValue = document.getElementById('randshanon-value');
         const selectedAlgorithm = $('#prob-algorithm-choice').val();
+        const selectedRandshanon = $('#randshanon-value').val();
         const data = $('#algorithm-form-popup').data('probData');
         data.algorithm = selectedAlgorithm;
+        data.randshanonValue = selectedRandshanon
 
         socket.emit('run_probabilistic_algorithm', data);
 
         algorithmFormPopup.style.display = 'none';
         overlay.style.display = 'none';
+        randshanonOptions.style.display = 'none';
+        randshanonValue.value = '';
         $('#algorithm-form')[0].reset();
+    });
+
+    document.getElementById('prob-algorithm-choice').addEventListener('change', function() {
+        var algorithmChoice = this.value;
+        var randshanonOptions = document.getElementById('randshanon-options');
+        var randshanonValue = document.getElementById('randshanon-value');
+    
+        if (algorithmChoice === 'randshanon') {
+            randshanonOptions.style.display = 'block';
+        } else {
+            randshanonOptions.style.display = 'none';
+            randshanonValue.value = '';
+        }
     });
 
     document.getElementById('image-form').addEventListener('submit', (e) => {
@@ -749,6 +767,44 @@ $(function () {
                 } else {
                     messageNotify(msg);
                 }
+            }
+        }
+    });
+
+    socket.on('hidden_message_image', data => {
+        if (userType === 'steganaliste') {
+            const roomId = data.roomID;
+
+            const room = rooms.find(room => {
+                try {
+                    return room.id === roomId;
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            if (room) {
+                room.history.push(data);
+                addChatImage(data.username, data.image, data.time);
+            }
+        }
+    });
+
+    socket.on('hidden_message_proba', data => {
+        if (userType === 'steganaliste') {
+            const roomId = data.roomID;
+
+            const room = rooms.find(room => {
+                try {
+                    return room.id === roomId;
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            if (room) {
+                room.history.push(data);
+                addChatMessage(data);
             }
         }
     });

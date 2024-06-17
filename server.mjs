@@ -893,7 +893,7 @@ function executeSteganoTool(method, operation, inputImage, outputImage, message,
     });
 }
 
-function executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, callback) {
+function executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, randshanonValue, callback) {
     let binaryPath = "";
     let args = "";
     if (choosenAlgorithm === "lsb" || choosenAlgorithm === "img-delta") {
@@ -901,14 +901,18 @@ function executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, 
         args = ['-t', choosenAlgorithm, '-i', imagePath, outputPath + '.png'];
     } else {
         binaryPath = path.resolve(__dirname, 'target/release/steganomafia');
-        args = ['-d', imagePath, choosenAlgorithm, '-o', outputPath];
+        if (choosenAlgorithm === "randshanon") {
+            args = ['-d', imagePath, choosenAlgorithm, randshanonValue, '-o', outputPath];
+        } else {
+            args = ['-d', imagePath, choosenAlgorithm, '-o', outputPath];
+        }
     }
     execFile(binaryPath, args, (error, stdout, stderr) => {
         if (error) {
             callback(error, null);
             return;
         }
-        callback(null, stdout);
+        callback(null, outputPath);
     });
 }
 
@@ -952,8 +956,9 @@ function runProbabilisticAlgorithm(jsonFilePath, searchData, callback) {
         const imagePath = path.resolve(__dirname, 'images', imageName);
         const outputPath = path.resolve(__dirname, 'output_algo');
         const choosenAlgorithm = searchData.algorithm;
+        const randshanonValue = searchData.randshanonValue;
 
-        executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, callback);
+        executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, randshanonValue, callback);
     });
 }
 
@@ -1338,18 +1343,48 @@ io.on('connection', (socket) => {
     socket.on('run_probabilistic_algorithm', (data) => {
         console.log('run_probabilistic_algorithm data', data);
         const jsonFilePath = 'persist/images-data.json';
-        runProbabilisticAlgorithm(jsonFilePath, data, (err, message) => {
+        runProbabilisticAlgorithm(jsonFilePath, data, (err, path) => {
             if (err) {
                 console.error('Failed to retrieve hidden message:', err);
             } else {
-                console.log('Retrieved hidden message:', message);
+                console.log('Algo hidden message path:', path);
                 
                 const responseData = {
-                    roomID: data.roomID,
-                    secretMessage: message
+                    roomID: data.roomID
                 }
 
-                socket.emit('hidden_message_revealed', responseData );
+                if (data.algorithm === 'lsb' || data.algorithm === 'img-delta') {
+                    const pathImg = path+'.png';
+                    fs.readFile(pathImg, 'base64', (err, imageBase64) => {
+                        if (err) {
+                            console.error('Error reading image file:', err);
+                        } else {
+                            console.log('imageBase64', imageBase64);
+                            const dataToSend = {
+                                username: 'Server',
+                                image: "data:image/png;base64,"+imageBase64,
+                                roomID: data.roomID,
+                                time: data.date
+                            };
+                            socket.emit('hidden_message_image', dataToSend );
+                        }
+                    });
+                } else {
+                    fs.readFile(path, 'utf8', (err, proba) => {
+                        if (err) {
+                            console.error('Error reading image file:', err);
+                        } else {
+                            const dataToSend = {
+                                username: 'Server',
+                                message: proba,
+                                roomID: data.roomID,
+                                time: data.date
+                            };
+                            // socket.emit('hidden_message_image', responseData );
+                            socket.emit('hidden_message_proba', dataToSend );
+                        }
+                    });
+                }
             }
         });
     });
