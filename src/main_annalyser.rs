@@ -9,11 +9,6 @@ use statrs::distribution::{Binomial, ChiSquared, ContinuousCDF, Discrete};
 use crate::{rs::{default_compute_rs, defautl_dyn_rs}, shannon_entropy::{compute_shanon_entropy, entropy_and_randomization_after_first_measure, init_base_shanon_iterator}};
 
 //use crate::test_procedure::test_test_proc::run_test;
-
-
-
-
-
 const I_O_NAME: &str="input image> <output";
 const IM_TRANS: &str="image operation";
 const TRANS_LSB: &str="lsb";

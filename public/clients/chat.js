@@ -273,21 +273,58 @@ $(function () {
         socket.emit('run_probabilistic_algorithm', data);
     });
 
+    document.getElementById('algorithm-choice').addEventListener('change', function() {
+        const selectedValue = this.value;
+
+        const matrixAlphaChoice = document.getElementById('alpha-matrix-container');
+        const iteratorAlgorithm = document.getElementById('iterator-algorithm');
+        if (selectedValue === "viterbi") {
+            matrixAlphaChoice.style.display = 'block';
+            iteratorAlgorithm.style.display = 'none';
+            iteratorAlgorithm.value = "";
+        } else {
+            matrixAlphaChoice.style.display = 'none';
+            iteratorAlgorithm.style.display = 'block';
+        }
+    });
+
     $(document).on('click', '.reveal-hidden-message', function() {
         const username = $(this).data('username');
         const time = $(this).data('time');
         const imageSrc = $(this).data('image-src');
-    
-        // Envoyer les informations nécessaires au serveur
-        const data = {
-            user: username,
-            date: time,
-            source: imageSrc,
-            roomID: currentRoom.id
-        };
-    
+        const roomID = currentRoom.id;
+        const data = { user: username, date: time, source: imageSrc, roomID: roomID };
+
+        // imageFormPopup.style.display = 'block';
+        // overlay.style.display = 'block';
+
+        // // Use a timeout to ensure the element is ready to be focused
+        // setTimeout(() => {
+        //     secretMessageInput.focus();
+        // }, 0);
+
+        $('#passphrase-form-popup').data('revealData', data);
+        passphraseFormPopup.style.display = 'block';
+        overlay.style.display = 'block';
+        passphraseAesInput.focus();
+    });
+
+    $('#passphrase-form').on('submit', function(e) {
+        e.preventDefault();
+        const passphrase = $('#aes-key-reveal').val();
+        const data = $('#passphrase-form-popup').data('revealData');
+        data.passphrase = passphrase;
+
         socket.emit('reveal_hidden_message', data);
-    });    
+
+        passphraseFormPopup.style.display = 'none';
+        overlay.style.display = 'none';
+        // $('#passphrase-form-popup').hide();
+        // $('#overlay').hide();
+        // $('#passphrase-form-popup')[0].reset();
+        document.getElementById('passphrase-form').reset();
+    });
+  
 
     function addChatImage(username, imageSrc, timeObj) {
         let time = new Date(timeObj).toLocaleTimeString('en-US', {
@@ -388,9 +425,11 @@ $(function () {
 
     // Get a reference to the drop zone element
     const dropZone = document.getElementById('drop-zone');
-    const formPopup = document.getElementById('form-popup');
+    const imageFormPopup = document.getElementById('image-form-popup');
+    const passphraseFormPopup = document.getElementById('passphrase-form-popup');
     const overlay = document.getElementById('overlay');
-    const descriptionInput = document.getElementById('message-secret');
+    const secretMessageInput = document.getElementById('message-secret');
+    const passphraseAesInput = document.getElementById('aes-key-reveal');
     let droppedImageFile = null;
 
     // Prevent the default behavior of the browser when a file is dropped
@@ -415,12 +454,12 @@ $(function () {
 
             if (userType === 'mafia') {
                 // Show the form popup and overlay
-                formPopup.style.display = 'block';
+                imageFormPopup.style.display = 'block';
                 overlay.style.display = 'block';
     
                 // Use a timeout to ensure the element is ready to be focused
                 setTimeout(() => {
-                    descriptionInput.focus();
+                    secretMessageInput.focus();
                 }, 0);
             } else {
                 handleImageFile(droppedImageFile)
@@ -441,17 +480,16 @@ $(function () {
             const files = e.target.files;
 
             if (files.length > 0) {
-                // Assume the first file is the image
                 droppedImageFile = files[0];
 
                 if (userType === 'steganaliste') {
                     handleImageFile(droppedImageFile)
-                } else {    // he is from mafia
-                    formPopup.style.display = 'block';
+                } else {
+                    imageFormPopup.style.display = 'block';
                     overlay.style.display = 'block';
         
                     setTimeout(() => {
-                        descriptionInput.focus();
+                        secretMessageInput.focus();
                     }, 0);
                 }
             }
@@ -464,20 +502,31 @@ $(function () {
         e.preventDefault();
     
         const secretMessage = document.getElementById('message-secret').value;
-        const dropdownChoice = document.getElementById('dropdown-choice').value;
+        const dropdownChoice = document.getElementById('algorithm-choice').value;
         const imagePercentage = document.getElementById('image-percentage').value;
         const keyFile = document.getElementById('key-file').value;
         const iteratorAlgorithm = document.getElementById('iterator-algorithm').value;
+        const alphaMatrix = document.getElementById('alpha-matrix') ? document.getElementById('alpha-matrix').value : null;
     
-        handleImageFile(droppedImageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm);
+        handleImageFile(droppedImageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm, alphaMatrix);
     
-        formPopup.style.display = 'none';
+        imageFormPopup.style.display = 'none';
         overlay.style.display = 'none';
     
         document.getElementById('image-form').reset();
+    
+        document.getElementById('alpha-matrix-container').style.display = 'none';
     });
     
-    function handleImageFile(imageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm) {
+
+    document.getElementById('passphrase-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const aesKey = document.getElementById('aes-key-reveal').value;
+
+    });
+    
+    function handleImageFile(imageFile, secretMessage, dropdownChoice, imagePercentage, keyFile, iteratorAlgorithm, alphaMatrix) {
         if (imageFile.type.startsWith('image/')) {
             const reader = new FileReader();
     
@@ -489,7 +538,8 @@ $(function () {
                     dropdownChoice: dropdownChoice ? dropdownChoice : "",
                     imagePercentage: imagePercentage ? imagePercentage : "",
                     keyFile: keyFile ? keyFile : "",
-                    iteratorAlgorithm: iteratorAlgorithm ? iteratorAlgorithm : ""
+                    iteratorAlgorithm: iteratorAlgorithm ? iteratorAlgorithm : "",
+                    alphaMatrix: alphaMatrix ? alphaMatrix : ""
                 };
                 sendImage(data);
             };
@@ -504,7 +554,7 @@ $(function () {
         if (connected && currentRoom !== false) {
             const user = encryptConnectionDataWithoutHashing(window.user, serverPublicKey);
             const msgSymmetricKey = generateSymmetricKey().toString();
-    
+            
             const msg = {
                 sender: user,
                 image: data.image,
@@ -513,14 +563,15 @@ $(function () {
                 imagePercentage: data.imagePercentage,
                 keyFile: data.keyFile,
                 iteratorAlgorithm: data.iteratorAlgorithm,
+                alphaMatrix: data.alphaMatrix,
                 roomID: currentRoom.id,
             };
+
+            console.log("sendImage msg", msg);
+
             socket.emit('new image message', msg);
         }
     }
-    
-    
-
 
     /////////////////////
     // Keyboard events //
@@ -528,7 +579,7 @@ $(function () {
 
     $window.keydown(event => {
         // Check if the modalShowing variable is true or if the form popup is visible
-        if (modalShowing || formPopup.style.display === 'block') {
+        if (modalShowing || imageFormPopup.style.display === 'block' || passphraseFormPopup.style.display === 'block') {
             return;
         }
     

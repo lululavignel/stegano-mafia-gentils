@@ -300,6 +300,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
+name = "complex-division"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bdd8b67ec18cce59de3d9247973a3e553d20aad28382c2a76a2dc55bbff207a7"
+
+[[package]]
 name = "conv"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1288,6 +1294,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ndarray"
+version = "0.15.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adb12d4e967ec485a5f71c6311fe28158e9d6f4bc4a447b474184d0f91a8fa32"
+dependencies = [
+ "matrixmultiply",
+ "num-complex",
+ "num-integer",
+ "num-traits",
+ "rawpointer",
+]
+
+[[package]]
 name = "ndk"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1627,6 +1646,17 @@ dependencies = [
  "fdeflate",
  "flate2",
  "miniz_oxide",
+]
+
+[[package]]
+name = "polynomen"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6af0d462ed2d4812e3fc3f73bd86c665a6a00f5121961d5d568ab8b1e5a0342"
+dependencies = [
+ "complex-division",
+ "ndarray",
+ "zip-fill",
 ]
 
 [[package]]
@@ -2112,6 +2142,7 @@ dependencies = [
  "md-5",
  "num",
  "openssl",
+ "polynomen",
  "rand 0.8.5",
  "sha2",
  "sha3",
@@ -2862,6 +2893,12 @@ dependencies = [
  "quote",
  "syn 2.0.66",
 ]
+
+[[package]]
+name = "zip-fill"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c738884b5b05ec082cf9554e2f48f2053a8b01ab3b6d4c943de1560f68362d57"
 
 [[package]]
 name = "zune-inflate"

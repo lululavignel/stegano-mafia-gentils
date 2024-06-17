@@ -52,13 +52,13 @@
                 <p>Drag & Drop an Image Here</p>
             </div>
 
-            <div id="form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+            <div id="image-form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
                 <form id="image-form">
                     <label for="message-secret">Message caché à intégrer:</label>
                     <input type="text" id="message-secret" name="message-secret">
                     
-                    <label for="dropdown-choice">Choisissez un élément:</label>
-                    <select id="dropdown-choice" name="dropdown-choice">
+                    <label for="algorithm-choice">Choisissez un algorithme:</label>
+                    <select id="algorithm-choice" name="algorithm-choice">
                         <option value="" selected>Aucun</option>
                         <option value="lsb">LSB</option>
                         <option value="pvd">PVD</option>
@@ -69,7 +69,7 @@
                     <label for="image-percentage">Pourcentage de l'image à utiliser:</label>
                     <input type="number" id="image-percentage" name="image-percentage" step="0.01" min="0" max="1">
             
-                    <label for="key-file">Fichier de clé AES:</label>
+                    <label for="key-file">Clé AES:</label>
                     <input type="text" id="key-file" name="key-file">
             
                     <label for="iterator-algorithm">Algorithme de l'itérateur:</label>
@@ -79,7 +79,29 @@
                         <option value="sha256">SHA-256</option>
                         <option value="sha512">SHA-512</option>
                     </select>
+
+                    <div id="alpha-matrix-container" style="display: none;">
+                        <label for="alpha-matrix">Alpha de la Matrice:</label>
+                        <select id="alpha-matrix" name="alpha-matrix">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
             
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+
+            <div id="passphrase-form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+                <form id="passphrase-form">
+                    <label for="aes-key-reveal">Clé AES:</label>
+                    <input type="text" id="aes-key-reveal" name="aes-key-reveal">
                     <button type="submit">Submit</button>
                 </form>
             </div>

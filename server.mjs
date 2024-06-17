@@ -7,6 +7,7 @@ const he = require('he');
 const os = require('os');
 const cryptico = require('cryptico');
 const CryptoJS = require('crypto-js');
+const crypto = require('crypto');
 const bodyParser = require('body-parser');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
@@ -337,7 +338,8 @@ function persistImage(data) {
         direct: data.direct,
         imagePercentage: data.imagePercentage,
         keyFile: data.keyFile,
-        iteratorAlgorithm: data.iteratorAlgorithm
+        iteratorAlgorithm: data.iteratorAlgorithm,
+        alphaMatrix: data.alphaMatrix
     });
 
     try {
@@ -855,7 +857,7 @@ function isUserInRoom(room, username) {
 }
 
 function executeSteganoTool(method, operation, inputImage, outputImage, message, additionalOptions = [], callback) {
-    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/debug/steganomafia');
+    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
     
     // Check if the binary exists
     if (!fs.existsSync(binaryPath)) {
@@ -876,7 +878,6 @@ function executeSteganoTool(method, operation, inputImage, outputImage, message,
         '-i', inputImage,
         outputImage,
         '-t', message,
-//        '-s', messageSize.toString(),
         ...additionalOptions
     ];
     
@@ -898,8 +899,8 @@ function executeSteganoToolRetrieve(method, operation, inputImage, outputText, m
         return;
     }
 
-    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/debug/steganomafia');
-    const args = [operation, method, '-i', inputImage, outputText, '-s', messageLength.toString(), ...additionalOptions];
+    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
+    const args = [operation, method, '-i', inputImage, outputText, ...additionalOptions];
     execFile(binaryPath, args, (error, stdout, stderr) => {
         if (error) {
             callback(error, null);
@@ -909,8 +910,27 @@ function executeSteganoToolRetrieve(method, operation, inputImage, outputText, m
     });
 }
 
+/**
+ * Retrieves a hidden message from an image stored in a JSON file.
+ *
+ * This function reads a JSON file containing metadata about images, searches for the specified image
+ * using the provided search data, and retrieves a hidden message from that image using steganography.
+ * It then returns the hidden message through the callback function.
+ *
+ * @param {string} jsonFilePath - The path to the JSON file containing image metadata.
+ * @param {Object} searchData - An object containing the search criteria for the image.
+ * @param {string} searchData.user - The username of the person who sent the image.
+ * @param {number} searchData.date - The timestamp of when the image was sent.
+ * @param {string} searchData.source - The base64-encoded image data.
+ * @param {number} searchData.roomID - The ID of the room where the image was sent.
+ * @param {string} searchData.passphrase - The optional passphrase (aes key) to retrieve the secret message.
+ * @param {function} callback - A callback function that will be called with the hidden message or an error.
+ * @param {Error} callback.error - An error object if an error occurred, otherwise null.
+ * @param {string} callback.message - The retrieved hidden message, or null if an error occurred.
+ */
 function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
-    // Read the JSON file
+    const keyFilePath = path.resolve('/tmp', `key_${searchData.date}.txt`);
+
     fs.readFile(jsonFilePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading JSON file:', err);
@@ -918,11 +938,13 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
             return;
         }
 
-        // Parse the JSON data
         const jsonData = JSON.parse(data);
-
-        // Find the matching image data based on the provided searchData
         const imageData = jsonData.find(item => item.time === searchData.date && item.from === searchData.user);
+        if (searchData.passphrase) {
+            const hexKey = generateHexKeyFromPassphrase(searchData.passphrase);
+            console.log("hexKey", hexKey);
+            fs.writeFileSync(keyFilePath, hexKey, 'utf8');
+        }
 
         if (!imageData) {
             const error = new Error('Image data not found');
@@ -934,8 +956,35 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
         const imageName = imageData.imageName;
         const imageBase64 = imageData.image.split(',')[1];
         const method = imageData.method;
+        // TODO: la raison pour laquelle il me sort parfois des /tmp/... c'est peut être a cause du fait que je pred toujours la message_length... il faudrait quej e fasse en sorte de ci cette dernière est pas défini alors on prend le %
         const messageLength = imageData.message_length;
         const time = imageData.time;
+
+        let additionalOptions = [];
+        switch (method) {
+            case '-l':
+                additionalOptions.push('-s', imageData.message_length);
+                if (searchData.passphrase !== "") additionalOptions.push('-c', keyFilePath);
+                if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
+                break;
+            case '-d':
+                additionalOptions.push('-s', imageData.message_length);
+                if (searchData.passphrase !== "") additionalOptions.push('-c', keyFilePath);
+                if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
+                break;
+            case '-v':
+                additionalOptions.push('--height', '7');
+                additionalOptions.push('--alpha', imageData.alphaMatrix);
+                additionalOptions.push('-s', imageData.message_length);
+                if (searchData.passphrase !== "") additionalOptions.push('-c', keyFilePath);
+                // if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
+                break;
+            case '-f':
+                break;
+            default:
+                console.error('Unknown steganography method:', data.stegaChoice);
+                return;
+        }
 
         // Create paths for the image and the output text file
         const imagePath = path.resolve(__dirname, 'images', imageName);
@@ -959,7 +1008,7 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
             }
 
             // Execute the steganography tool to retrieve the hidden message
-            executeSteganoToolRetrieve(method, '-r', imagePath, outputTextPath, messageLength, [], (err, result) => {
+            executeSteganoToolRetrieve(method, '-r', imagePath, outputTextPath, messageLength, additionalOptions, (err, result) => {
                 if (err) {
                     console.error('Error retrieving message:', err);
                     callback(err);
@@ -980,6 +1029,10 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
             });
         });
     });
+}
+
+function generateHexKeyFromPassphrase(passphrase) {
+    return crypto.createHash('sha256').update(passphrase).digest('hex').slice(0, 32).toUpperCase();
 }
 
 ///////////////////////////
@@ -1004,18 +1057,10 @@ io.on('connection', (socket) => {
         const outputImagePath = path.resolve(__dirname, 'images', `encoded_${uniqueFileName}`);
         const messageFilePath = path.resolve('/tmp', `message_${time}.txt`);
         const keyFilePath = path.resolve('/tmp', `key_${time}.txt`);
-    
-        const generateAESKey = () => {
-            const key = CryptoJS.lib.WordArray.random(128 / 8).toString();
-            return key;
-        };
-    
-        const keyToHex = (key) => {
-            return key.split('').map(c => c.charCodeAt(0).toString(16)).join('');
-        };
+
+        console.log('new image message data', data);
     
         if (data.stegaChoice !== '') {
-            // Save the image to the server
             fs.writeFile(imagePath, Buffer.from(data.image.split(',')[1], 'base64'), (err) => {
                 if (err) {
                     console.error('Error saving the image:', err);
@@ -1031,14 +1076,12 @@ io.on('connection', (socket) => {
                         return;
                     }
     
-                    // Save the key file if provided
                     if (data.keyFile) {
-                        const key = generateAESKey();
-                        const hexKey = keyToHex(key);
+                        const hexKey = generateHexKeyFromPassphrase(data.keyFile);
+                        console.log("hexKey", hexKey);
                         fs.writeFileSync(keyFilePath, hexKey, 'utf8');
                     }
     
-                    // Determine the steganography method and additional options
                     let method;
                     let additionalOptions = [];
                     switch (data.stegaChoice) {
@@ -1054,9 +1097,25 @@ io.on('connection', (socket) => {
                             break;
                         case 'pvd':
                             method = '-d';
+                            if (data.imagePercentage) {
+                                additionalOptions.push('-p', data.imagePercentage);
+                            } else {
+                                additionalOptions.push('-s', Buffer.byteLength(data.secretMessage, 'utf8').toString());
+                            }
+                            if (data.keyFile) additionalOptions.push('-c', keyFilePath);
+                            if (data.iteratorAlgorithm) additionalOptions.push('-g', data.iteratorAlgorithm);
                             break;
                         case 'viterbi':
                             method = '-v';
+                            if (data.imagePercentage) {
+                                additionalOptions.push('-p', data.imagePercentage);
+                            } else {
+                                additionalOptions.push('-s', Buffer.byteLength(data.secretMessage, 'utf8').toString());
+                            }
+                            if (data.keyFile) additionalOptions.push('-c', keyFilePath);
+                            if (data.iteratorAlgorithm) additionalOptions.push('-g', data.iteratorAlgorithm);
+                            additionalOptions.push('--height', '7');
+                            additionalOptions.push('--alpha', data.alphaMatrix);
                             break;
                         case 'dct':
                             method = '-f';
@@ -1103,8 +1162,8 @@ io.on('connection', (socket) => {
                                     time: time,
                                     direct: room.direct,
                                     imagePercentage: data.imagePercentage,
-                                    keyFile: keyFilePath,
-                                    iteratorAlgorithm: data.iteratorAlgorithm
+                                    iteratorAlgorithm: data.iteratorAlgorithm,
+                                    alphaMatrix: data.alphaMatrix
                                 });
                             });
                         });
@@ -1236,6 +1295,7 @@ io.on('connection', (socket) => {
 
     socket.on('reveal_hidden_message', (data) => {
         const jsonFilePath = 'persist/images-data.json';
+        console.log("reveal_hidden_message", data);
         retrieveHiddenMessage(jsonFilePath, data, (err, message) => {
             if (err) {
                 console.error('Failed to retrieve hidden message:', err);
