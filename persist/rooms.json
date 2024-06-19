@@ -79,5 +79,71 @@
         "publicKey": "y5JkxM/zrADwcMxnbelo1SfuE5AzjoRlNuyIe4M0DuOU5mjR4K43mf3JmKU1DgQydqNohy9Y0guGWf4JP/nR76jrWO2MjsVib+sQb6ER28Xx15UqZT76eKht5L95GRTPm2a8z2WoUKEyyf/SVFNJCyrS3vVqSUJzcxv5javgvGuj1l0AENM9FX1GtmsmrjnhLIUt3pprxId4JMbH3oj8QsYfa0IA41JqD+FiW44weKtdV0gipMFY8R0LBUFFGSG+BWzN8TzYnHmrgADTHOB5rur+Oz59RHrByxD/hEVk3lBYcFFoC3MTas1BIbtj1lOQRSbZ9p6LgQwYpjpACb8Smw=="
       }
     ]
+  },
+  {
+    "id": 3,
+    "name": "un channel",
+    "description": "",
+    "options": {
+      "forceMembership": false,
+      "private": false,
+      "direct": false
+    },
+    "members": [
+      {
+        "username": "oki",
+        "email": "oki@gmail.com",
+        "publicKey": "y5JkxM/zrADwcMxnbelo1SfuE5AzjoRlNuyIe4M0DuOU5mjR4K43mf3JmKU1DgQydqNohy9Y0guGWf4JP/nR76jrWO2MjsVib+sQb6ER28Xx15UqZT76eKht5L95GRTPm2a8z2WoUKEyyf/SVFNJCyrS3vVqSUJzcxv5javgvGuj1l0AENM9FX1GtmsmrjnhLIUt3pprxId4JMbH3oj8QsYfa0IA41JqD+FiW44weKtdV0gipMFY8R0LBUFFGSG+BWzN8TzYnHmrgADTHOB5rur+Oz59RHrByxD/hEVk3lBYcFFoC3MTas1BIbtj1lOQRSbZ9p6LgQwYpjpACb8Smw=="
+      },
+      {
+        "username": "era",
+        "email": "era@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Direct-era-oki",
+    "description": "",
+    "options": {
+      "forceMembership": false,
+      "private": true,
+      "direct": true
+    },
+    "members": [
+      {
+        "username": "era",
+        "email": "era@gmail.com",
+        "publicKey": "gqioaXt8y+bV7hiW2gIRzEBUoytgKMDykyaQaGR41Y65tYlzHYDL4NDteeAOoHB3ixcr4j+hjs2ud1IoxwOJ/BzEI0jqLeLYBQU7nvgTmQul+FdnZKYkBQA6SuMGggVZQLcYd6vFxtYPnvmK/QIAKZA3FzRmP9U7ElsJl0aAe9GSnI6Qa5DoSQrkwNiz+iDvfOjtchc3J25Nj4QshwufxgeF3B0U0Dg3X+lY0Qcyea8hB8bIQEQNig10vXWDqd0ezMRP1fsNTEhUX1kAtRImhTodRttU492UCDYHhm5c9pTytijKlBMGeCsJaXztCM5Y3x+SLtsRKn7QPq3OKUzX5Q=="
+      },
+      {
+        "username": "oki",
+        "email": "oki@gmail.com",
+        "publicKey": "y5JkxM/zrADwcMxnbelo1SfuE5AzjoRlNuyIe4M0DuOU5mjR4K43mf3JmKU1DgQydqNohy9Y0guGWf4JP/nR76jrWO2MjsVib+sQb6ER28Xx15UqZT76eKht5L95GRTPm2a8z2WoUKEyyf/SVFNJCyrS3vVqSUJzcxv5javgvGuj1l0AENM9FX1GtmsmrjnhLIUt3pprxId4JMbH3oj8QsYfa0IA41JqD+FiW44weKtdV0gipMFY8R0LBUFFGSG+BWzN8TzYnHmrgADTHOB5rur+Oz59RHrByxD/hEVk3lBYcFFoC3MTas1BIbtj1lOQRSbZ9p6LgQwYpjpACb8Smw=="
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Direct-test-oki",
+    "description": "",
+    "options": {
+      "forceMembership": false,
+      "private": true,
+      "direct": true
+    },
+    "members": [
+      {
+        "username": "test",
+        "email": "test@gmail.com",
+        "publicKey": "mBaMnvnzsOzt4EpSbpNCJPZQapWeXklMWaonW8777ujx3mvDGOUD8rhiv5mCmgqARTAdQ0HQHCnMp7nqANbEtDH/nKRDSx3XdsFX5gqoKdc0JPNoWWEW0Zhcgg/W6AQYdliYX7Ir40zD2wK0h+FspPkL0vifeLYbJhfGYQ7p61c25LGyGS6LT76NQhU12F/8Qh6JFsvfB2zQvevchn25UPwjta22L7DZuYeSWB24+fx5bjJvrEluE/43YGZfScEORwRWQKoQ43MuD0ccodLGp33UK5QyoWre6VIDWIa7QpTRa0npyzJ0kH95zHWbn+AVhaR3mQKUWBiw36VyHcZDdw=="
+      },
+      {
+        "username": "oki",
+        "email": "oki@gmail.com",
+        "publicKey": "y5JkxM/zrADwcMxnbelo1SfuE5AzjoRlNuyIe4M0DuOU5mjR4K43mf3JmKU1DgQydqNohy9Y0guGWf4JP/nR76jrWO2MjsVib+sQb6ER28Xx15UqZT76eKht5L95GRTPm2a8z2WoUKEyyf/SVFNJCyrS3vVqSUJzcxv5javgvGuj1l0AENM9FX1GtmsmrjnhLIUt3pprxId4JMbH3oj8QsYfa0IA41JqD+FiW44weKtdV0gipMFY8R0LBUFFGSG+BWzN8TzYnHmrgADTHOB5rur+Oz59RHrByxD/hEVk3lBYcFFoC3MTas1BIbtj1lOQRSbZ9p6LgQwYpjpACb8Smw=="
+      }
+    ]
   }
 ]

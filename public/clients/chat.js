@@ -258,6 +258,28 @@ $(function () {
         }
     }
 
+    function sendInBatches(event, data, batchSize, callback) {
+        const serializedData = JSON.stringify(data);
+        const totalSize = serializedData.length;
+        let start = 0;
+    
+        function sendNextBatch() {
+            if (start < totalSize) {
+                const end = Math.min(start + batchSize, totalSize);
+                const batch = serializedData.slice(start, end);
+    
+                socket.emit(event, { batch, start, end, totalSize });
+    
+                start = end;
+                setTimeout(sendNextBatch, 10); // Adjust the timeout as needed
+            } else if (callback) {
+                callback();
+            }
+        }
+    
+        sendNextBatch();
+    }
+
     ////////////////////////////////////////////////////////////////
     // USEFUL //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
@@ -330,7 +352,9 @@ $(function () {
         const data = $('#passphrase-form-popup').data('revealData');
         data.passphrase = passphrase;
 
-        socket.emit('reveal_hidden_message', data);
+        sendInBatches('reveal_hidden_message', data, 10240, function() {
+            console.log('All data sent successfully!');
+        });
 
         passphraseFormPopup.style.display = 'none';
         overlay.style.display = 'none';
@@ -627,7 +651,11 @@ $(function () {
 
             console.log("sendImage msg", msg);
 
-            socket.emit('new image message', msg);
+            sendInBatches('new image message', msg, 10240, function() {
+                console.log('All data sent successfully!');
+            });
+
+            // socket.emit('new image message', msg);
         }
     }
 
@@ -871,7 +899,8 @@ $(function () {
     ////////////////
 
     socket.on('connect', () => {
-        socket.emit('join', user);
+        if (user.username != 'null')
+            socket.emit('join', user);
     });
 
     socket.on('disconnect', () => { });
