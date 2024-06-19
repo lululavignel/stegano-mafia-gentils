@@ -8,18 +8,22 @@ $(function () {
     const $roomList = $('#room-list');
     const $userList = $('#user-list');
 
-    const username = getCookie('username');
-    const hashedPassword = getCookie('hashedPassword');
-    const email = getCookie('email');
-    const userType = getCookie('userType');
-    const serverPublicKey = getCookie('serverPublicKey');
-    if (username && hashedPassword)
+    let username = window.username || getCookie('username');
+    let hashedPassword = window.hashedPassword || getCookie('hashedPassword');
+    let email = window.email || getCookie('email');
+    let userType = window.userType || getCookie('userType');
+    let serverPublicKey = window.serverPublicKey || getCookie('serverPublicKey');
+    
+    if (username && hashedPassword) {
         userKeyPair = generateKeyPair({ username, hashedPassword });
+    }
+    
     let connected = false;
     let socket = io();
     let modalShowing = false;
-
+    
     window.user = { username: username, email: email, hashedPassword: hashedPassword };
+    
 
     $usernameLabel.text(username);
 
@@ -277,11 +281,25 @@ $(function () {
         const selectedValue = this.value;
 
         const matrixAlphaChoice = document.getElementById('alpha-matrix-container');
-        const iteratorAlgorithm = document.getElementById('iterator-algorithm');
+        
+        const imagePercentage = document.getElementById('image-percentage-container');
+        const keyFile = document.getElementById('key-file-container');
+        const iteratorAlgorithm = document.getElementById('iterator-algorithm-container');
+
         if (selectedValue === "viterbi") {
             matrixAlphaChoice.style.display = 'block';
         } else {
             matrixAlphaChoice.style.display = 'none';
+        }
+
+        if (selectedValue === "dct") {
+            imagePercentage.style.display = 'none';
+            keyFile.style.display = 'none';
+            iteratorAlgorithm.style.display = 'none';
+        } else {
+            imagePercentage.style.display = 'block';
+            keyFile.style.display = 'block';
+            iteratorAlgorithm.style.display = 'block';
         }
     });
 
@@ -331,13 +349,13 @@ $(function () {
         });
     
         let additionalButton = '';
-        if (userType === 'steganaliste') {
+        if (userType === 'steganaliste' && username !== 'Server') {
             additionalButton = `
                 <button class="run-prob-algorithm" data-username="${username}" data-time="${timeObj}" data-image-src="${imageSrc}">
                     Lancer algorithme probabiliste
                 </button>
             `;
-        } else if (userType === 'mafia') {
+        } else if (userType === 'mafia' && username !== 'Server') {
             additionalButton = `
                 <button class="reveal-hidden-message" data-username="${username}" data-time="${timeObj}" data-image-src="${imageSrc}">
                     Retrouver le message caché

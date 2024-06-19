@@ -11,9 +11,10 @@ function setCookie(name, value, days) {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + days);
     const cookieValue = encodeURIComponent(value) + (days ? `; expires=${expirationDate.toUTCString()}` : '');
-    // Set the cookie in the browser with the specified name, value, path, and secure flag
-    document.cookie = `${name}=${cookieValue}; path=/; Secure`;
+    // Make sure the cookie is accessible throughout the site
+    document.cookie = `${name}=${cookieValue}; path=/; SameSite=Lax`;
 }
+
 
 /**
  * Retrieves the value of the cookie with the specified name.

@@ -38,11 +38,15 @@ pub fn encrypt_aes128(plaintext:&Vec<u8>,key:&[u8]) -> Vec<u8>{
 pub fn decrypt_aes128(ciphertext:&Vec<u8>, key:&[u8]) -> Vec<u8> {
     //println!("ciphertext len : {}", ciphertext.len());
     let iv = b"\x00\x01\x02\x03\x04\x05\x06\x07\x00\x01\x02\x03\x04\x05\x06\x07";
+    let mut n_ciphertext = ciphertext.clone();
+    while n_ciphertext.len()%16!=0{
+        n_ciphertext.pop();
+    }
     let  plaintext = decrypt(
         Cipher::aes_128_cbc(),
         key,
         Some(iv),
-        &ciphertext).unwrap();
+        &n_ciphertext).unwrap();
 
     return  plaintext;
     

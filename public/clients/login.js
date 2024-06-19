@@ -89,6 +89,8 @@ $(function () {
             setCookie("serverPublicKey", data.serverPublicKey, 7);
             setCookie("userType", data.userType, 7);
 
+            console.log('user_identified_successfully userDecrypted', userDecrypted);
+
             window.location.href = '/chat.html';
 
         });

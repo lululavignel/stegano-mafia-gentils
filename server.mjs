@@ -40,7 +40,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Start server
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
     console.log('Server listening on port %d', port);
 });
 
@@ -298,7 +298,6 @@ function checkUserIdentity(user) {
             }
         }
     }
-
     return false;
 }
 
@@ -857,7 +856,13 @@ function isUserInRoom(room, username) {
 }
 
 function executeSteganoTool(method, operation, inputImage, outputImage, message, additionalOptions = [], callback) {
-    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
+    let binaryPath = '';
+    if (method !== '-f') {
+        binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
+    } else {
+        // TODO: continuer l'implémentation du DCT de Bertille en utilisant le format présenté dans le discord
+        binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/pythonStegMethod/DCT.py');
+    }
     
     // Check if the binary exists
     if (!fs.existsSync(binaryPath)) {
@@ -881,16 +886,30 @@ function executeSteganoTool(method, operation, inputImage, outputImage, message,
         ...additionalOptions
     ];
     
-    execFile(binaryPath, args, (error, stdout, stderr) => {
-        // Clean up the temporary file
-        fs.unlinkSync(tempMessagePath);
-        
-        if (error) {
-            callback(error, null);
-            return;
-        }
-        callback(null, stdout);
-    });
+    if (method !== '-f') {
+        execFile(binaryPath, args, (error, stdout, stderr) => {
+            // Clean up the temporary file
+            fs.unlinkSync(tempMessagePath);
+            
+            if (error) {
+                callback(error, null);
+                return;
+            }
+            callback(null, stdout);
+        });
+    } else {
+        // TODO: continuer l'implémentation du DCT de Bertille en utilisant le format présenté dans le discord
+        execFile('python3', [binaryPath, ...args], (error, stdout, stderr) => {
+            // Clean up the temporary file
+            fs.unlinkSync(tempMessagePath);
+            
+            if (error) {
+                callback(error, null);
+                return;
+            }
+            callback(null, stdout);
+        });
+    }
 }
 
 function executeProbabilisticAlgorithm(choosenAlgorithm, imagePath, outputPath, randshanonValue, callback) {
@@ -923,15 +942,40 @@ function executeSteganoToolRetrieve(method, operation, inputImage, outputText, m
         return;
     }
 
-    const binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
-    const args = [operation, method, '-i', inputImage, outputText, ...additionalOptions];
-    execFile(binaryPath, args, (error, stdout, stderr) => {
-        if (error) {
-            callback(error, null);
-            return;
-        }
-        callback(null, stdout);
-    });
+    let binaryPath = '';
+    if (method !== '-f') {
+        binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/target/release/steganomafia');
+    } else {
+        binaryPath = path.resolve(__dirname, '../stegano-mafia-mafia-master/pythonStegMethod/DCT.py');
+    }
+
+    let args = [];
+    if (method !== '-f') {
+        args = [operation, method, '-i', inputImage, outputText, ...additionalOptions];
+        execFile(binaryPath, args, (error, stdout, stderr) => {
+            // Clean up the temporary file
+            // fs.unlinkSync(tempMessagePath);
+            
+            if (error) {
+                callback(error, null);
+                return;
+            }
+            callback(null, stdout);
+        });
+    } else {
+        args = [operation,method, '-i', inputImage, ...additionalOptions, outputText]
+        // TODO: continuer l'implémentation du DCT de Bertille en utilisant le format présenté dans le discord
+        execFile('python3', [binaryPath, ...args], (error, stdout, stderr) => {
+            // Clean up the temporary file
+            // fs.unlinkSync(tempMessagePath);
+            
+            if (error) {
+                callback(error, null);
+                return;
+            }
+            callback(null, stdout);
+        });
+    }
 }
 
 function runProbabilisticAlgorithm(jsonFilePath, searchData, callback) {
@@ -1021,6 +1065,7 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
                 if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
                 break;
             case '-d':
+                // const messageSizeBit = (Number(imageData.message_length) * 8).toString();
                 additionalOptions.push('-s', imageData.message_length);
                 if (searchData.passphrase !== "") additionalOptions.push('-c', keyFilePath);
                 if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
@@ -1033,6 +1078,7 @@ function retrieveHiddenMessage(jsonFilePath, searchData, callback) {
                 if (imageData.iteratorAlgorithm) additionalOptions.push('-g', imageData.iteratorAlgorithm);
                 break;
             case '-f':
+                additionalOptions.push('-s', imageData.message_length);
                 break;
             default:
                 console.error('Unknown steganography method:', data.stegaChoice);
@@ -1170,6 +1216,7 @@ io.on('connection', (socket) => {
                             break;
                         case 'dct':
                             method = '-f';
+                            additionalOptions.push('-s', Buffer.byteLength(data.secretMessage, 'utf8').toString());
                             break;
                         default:
                             console.error('Unknown steganography method:', data.stegaChoice);
@@ -1376,7 +1423,7 @@ io.on('connection', (socket) => {
                         } else {
                             const dataToSend = {
                                 username: 'Server',
-                                message: proba,
+                                message: "Score de l'algorithme " + data.algorithm + " : " + proba,
                                 roomID: data.roomID,
                                 time: data.date
                             };
@@ -1399,7 +1446,7 @@ io.on('connection', (socket) => {
                 
                 const responseData = {
                     roomID: data.roomID,
-                    secretMessage: message
+                    secretMessage: "Le message caché était... " + message
                 }
 
                 socket.emit('hidden_message_revealed', responseData );
@@ -1640,6 +1687,8 @@ io.on('connection', (socket) => {
         socketmap[data.username] = socket;
         userLoggedIn = true;
 
+        console.log('\n\njoin data', data);
+        console.log('Users.getUsers()', Users.getUsers());
         const user = Users.getUser(data.username);
         if (user && checkUserIdentity(data)) {
             // Join the user to subscribed rooms and retrieve public channels
