@@ -408,20 +408,48 @@ $(function () {
             hour: "numeric",
             minute: "numeric"
         });
-
-        $messages.append(`
-      <div class="message">
-        <div class="message-avatar"></div>
-        <div class="message-textual">
-          <span class="message-user">${msg.username}</span>
-          <span class="message-time">${time}</span>
-          <span class="message-content">${msg.message}</span>
-        </div>
-      </div>
-    `);
-
+    
+        let shortMessage = msg.message.length > 500 ? msg.message.substring(0, 500) + '...' : msg.message;
+        let isLongMessage = msg.message.length > 500;
+    
+        let messageHtml = `
+            <div class="message">
+                <div class="message-avatar"></div>
+                <div class="message-textual">
+                    <span class="message-user">${msg.username}</span>
+                    <span class="message-time">${time}</span>
+                    <span class="message-content-short">${shortMessage}</span>
+                    <span class="message-content-full" style="display:none;">${msg.message}</span>
+                    ${isLongMessage ? '<button class="toggle-message-btn">Voir plus</button>' : ''}
+                </div>
+            </div>
+        `;
+    
+        $messages.append(messageHtml);
+    
+        if (isLongMessage) {
+            let messageElement = $messages.find('.message').last();
+            let shortContent = messageElement.find('.message-content-short');
+            let fullContent = messageElement.find('.message-content-full');
+            let toggleBtn = messageElement.find('.toggle-message-btn');
+    
+            toggleBtn.on('click', function() {
+                if (toggleBtn.text() === 'Voir plus') {
+                    shortContent.hide();
+                    fullContent.show();
+                    toggleBtn.text('Réduire');
+                } else {
+                    shortContent.show();
+                    fullContent.hide();
+                    toggleBtn.text('Voir plus');
+                }
+            });
+        }
+    
         $messages[0].scrollTop = $messages[0].scrollHeight;
     }
+    
+    
 
     function messageNotify(msg) {
         if (msg.direct)

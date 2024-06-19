@@ -54,9 +54,12 @@
 
             <div id="image-form-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
                 <form id="image-form">
-                    <label for="message-secret">Message caché à intégrer:</label>
-                    <input type="textarea" id="message-secret" name="message-secret" rows="200" cols="100">
-                    
+
+                    <div class="form-group" id="text-input">
+                        <label for="message-secret">Message caché à intégrer:</label>
+                        <textarea id="message-secret" name="message-secret" rows="4" cols="50"></textarea>
+                    </div>
+
                     <label for="algorithm-choice">Choisissez un algorithme:</label>
                     <select id="algorithm-choice" name="algorithm-choice">
                         <option value="" selected>Aucun</option>
